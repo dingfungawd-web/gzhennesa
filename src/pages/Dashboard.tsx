@@ -28,7 +28,7 @@ import {
 import { toast } from 'sonner';
 
 const Dashboard = () => {
-  const { username, logout, isAuthenticated } = useAuth();
+  const { username, logout, isAuthenticated, validateSession } = useAuth();
   const navigate = useNavigate();
   const [reports, setReports] = useState<Report[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -47,16 +47,26 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/');
+    if (isAuthenticated) {
+      loadReports();
       return;
     }
 
-    loadReports();
-  }, [isAuthenticated, navigate, username]);
+    let cancelled = false;
+    (async () => {
+      const ok = await validateSession();
+      if (!cancelled && !ok) {
+        navigate('/');
+      }
+    })();
 
-  const handleLogout = () => {
-    logout();
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, navigate, username, validateSession]);
+
+  const handleLogout = async () => {
+    await logout();
     toast.success('已登出');
     navigate('/');
   };

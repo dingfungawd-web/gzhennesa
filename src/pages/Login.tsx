@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,7 +38,6 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const { login } = useAuth();
-  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,10 +88,10 @@ const Login = () => {
         setIsLoading(false);
         return;
       }
-      
+
       login(user.user_id, user.username, sessionToken);
       toast.success(`歡迎，${user.username}！`);
-      navigate('/report/new');
+      // 路由跳轉交由 Index.tsx 的 isAuthenticated 監聽處理，避免狀態更新競態
     } catch (error) {
       toast.error('登入失敗，請重試');
     } finally {

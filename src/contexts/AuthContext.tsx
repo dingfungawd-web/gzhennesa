@@ -62,12 +62,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!token) return false;
 
     try {
-      const { data, error } = await supabase
-        .rpc('validate_session', { input_token: token });
+      const { data, error } = await supabase.rpc('validate_session', { input_token: token });
 
       if (error || !data || data.length === 0) {
         // Invalid session
-        logout();
+        await logout();
         return false;
       }
       return true;
