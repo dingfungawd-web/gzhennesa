@@ -6,13 +6,16 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ClipboardList, User, UserPlus } from 'lucide-react';
+import { ClipboardList, User, UserPlus, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
 const Login = () => {
   const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [registerUsername, setRegisterUsername] = useState('');
+  const [registerPassword, setRegisterPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const { login } = useAuth();
@@ -26,18 +29,42 @@ const Login = () => {
       return;
     }
 
+    if (!password) {
+      toast.error('請輸入密碼');
+      return;
+    }
+
     setIsLoading(true);
     
     try {
-      // Check if username exists in registered_users
-      const { data, error } = await supabase
+      // Get user and verify password
+      const { data: user, error: userError } = await supabase
         .from('registered_users')
-        .select('username')
+        .select('username, password_hash')
         .eq('username', username.trim())
         .single();
       
-      if (error || !data) {
+      if (userError || !user) {
         toast.error('此用戶名稱未註冊，請先註冊');
+        setIsLoading(false);
+        return;
+      }
+
+      if (!user.password_hash) {
+        toast.error('此帳號尚未設定密碼，請聯繫管理員');
+        setIsLoading(false);
+        return;
+      }
+
+      // Verify password using database function
+      const { data: isValid, error: verifyError } = await supabase
+        .rpc('verify_password', {
+          input_password: password,
+          stored_hash: user.password_hash
+        });
+
+      if (verifyError || !isValid) {
+        toast.error('密碼錯誤');
         setIsLoading(false);
         return;
       }
@@ -65,6 +92,21 @@ const Login = () => {
       return;
     }
 
+    if (!registerPassword) {
+      toast.error('請輸入密碼');
+      return;
+    }
+
+    if (registerPassword.length < 6) {
+      toast.error('密碼至少需要6個字元');
+      return;
+    }
+
+    if (registerPassword !== confirmPassword) {
+      toast.error('兩次輸入的密碼不一致');
+      return;
+    }
+
     setIsRegistering(true);
     
     try {
@@ -80,11 +122,24 @@ const Login = () => {
         setIsRegistering(false);
         return;
       }
+
+      // Hash password using database function
+      const { data: hashedPassword, error: hashError } = await supabase
+        .rpc('hash_password', { password: registerPassword });
+
+      if (hashError || !hashedPassword) {
+        toast.error('註冊失敗，請重試');
+        setIsRegistering(false);
+        return;
+      }
       
-      // Register new user
+      // Register new user with hashed password
       const { error } = await supabase
         .from('registered_users')
-        .insert({ username: registerUsername.trim() });
+        .insert({ 
+          username: registerUsername.trim(),
+          password_hash: hashedPassword
+        });
       
       if (error) {
         if (error.code === '23505') {
@@ -99,6 +154,8 @@ const Login = () => {
       toast.success('註冊成功！請登入');
       setUsername(registerUsername.trim());
       setRegisterUsername('');
+      setRegisterPassword('');
+      setConfirmPassword('');
     } catch (error) {
       toast.error('註冊失敗，請重試');
     } finally {
@@ -130,7 +187,7 @@ const Login = () => {
                   <User className="w-5 h-5" />
                   登入
                 </CardTitle>
-                <CardDescription>輸入已註冊的使用者名稱</CardDescription>
+                <CardDescription>輸入已註冊的使用者名稱和密碼</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleLogin} className="space-y-4">
@@ -141,12 +198,27 @@ const Login = () => {
                       <Input
                         id="username"
                         type="text"
-                        placeholder="請輸入已註冊的使用者名稱"
+                        placeholder="請輸入使用者名稱"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         className="pl-10"
                         autoComplete="username"
                         autoFocus
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password">密碼</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="password"
+                        type="password"
+                        placeholder="請輸入密碼"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="pl-10"
+                        autoComplete="current-password"
                       />
                     </div>
                   </div>
@@ -178,7 +250,7 @@ const Login = () => {
                       <Input
                         id="registerUsername"
                         type="text"
-                        placeholder="請輸入新的使用者名稱"
+                        placeholder="請輸入使用者名稱"
                         value={registerUsername}
                         onChange={(e) => setRegisterUsername(e.target.value)}
                         className="pl-10"
@@ -188,6 +260,39 @@ const Login = () => {
                     <p className="text-xs text-muted-foreground">
                       使用者名稱至少需要2個字元
                     </p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="registerPassword">密碼</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="registerPassword"
+                        type="password"
+                        placeholder="請輸入密碼"
+                        value={registerPassword}
+                        onChange={(e) => setRegisterPassword(e.target.value)}
+                        className="pl-10"
+                        autoComplete="new-password"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      密碼至少需要6個字元
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword">確認密碼</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="confirmPassword"
+                        type="password"
+                        placeholder="請再次輸入密碼"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className="pl-10"
+                        autoComplete="new-password"
+                      />
+                    </div>
                   </div>
                   <Button 
                     type="submit" 
