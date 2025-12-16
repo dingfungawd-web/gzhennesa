@@ -35,15 +35,67 @@ export type Database = {
         }
         Relationships: []
       }
+      user_sessions: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          token: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          token: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          token?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "registered_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      check_username_exists: {
+        Args: { check_username: string }
+        Returns: boolean
+      }
+      create_user_session: { Args: { input_user_id: string }; Returns: string }
+      delete_user_session: { Args: { input_token: string }; Returns: undefined }
       hash_password: { Args: { password: string }; Returns: string }
+      validate_session: {
+        Args: { input_token: string }
+        Returns: {
+          user_id: string
+          username: string
+        }[]
+      }
       verify_password: {
         Args: { input_password: string; stored_hash: string }
         Returns: boolean
+      }
+      verify_user_login: {
+        Args: { input_password: string; input_username: string }
+        Returns: {
+          user_id: string
+          username: string
+        }[]
       }
     }
     Enums: {
