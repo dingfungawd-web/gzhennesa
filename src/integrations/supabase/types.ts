@@ -18,16 +18,19 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          password_hash: string | null
           username: string
         }
         Insert: {
           created_at?: string
           id?: string
+          password_hash?: string | null
           username: string
         }
         Update: {
           created_at?: string
           id?: string
+          password_hash?: string | null
           username?: string
         }
         Relationships: []
@@ -37,7 +40,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      hash_password: { Args: { password: string }; Returns: string }
+      verify_password: {
+        Args: { password: string; password_hash: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
