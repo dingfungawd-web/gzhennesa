@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { ReportFormData, CompletedCase, FollowUpCase, emptyCompletedCase, emptyFollowUpCase } from '@/types/report';
-import { fetchUserReports, submitReport } from '@/services/googleSheetsService';
+import { ReportFormData, CompletedCase, FollowUpCase, emptyCompletedCase, emptyFollowUpCase, Report } from '@/types/report';
+import { fetchReportsByCode, submitReport, updateReport } from '@/services/googleSheetsService';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -42,6 +42,65 @@ const initialFormData: ReportFormData = {
   reportCode: '',
 };
 
+// Convert flat Report rows to ReportFormData
+const reportsToFormData = (reports: Report[]): ReportFormData => {
+  if (reports.length === 0) return initialFormData;
+
+  const first = reports[0];
+  const completedCases: CompletedCase[] = [];
+  const followUpCases: FollowUpCase[] = [];
+
+  reports.forEach(r => {
+    if (r.address || r.doorsInstalled || r.windowsInstalled) {
+      completedCases.push({
+        address: r.address || '',
+        actualDuration: r.actualDuration || '',
+        difficulties: r.difficulties || '',
+        measuringColleague: r.measuringColleague || '',
+        customerFeedback: r.customerFeedback || '',
+        customerWitness: r.customerWitness || '',
+        doorsInstalled: String(r.doorsInstalled || ''),
+        windowsInstalled: String(r.windowsInstalled || ''),
+        aluminumInstalled: String(r.aluminumInstalled || ''),
+        oldGrillesRemoved: String(r.oldGrillesRemoved || ''),
+      });
+    }
+    if (r.followUpAddress || r.followUpDoorsInstalled || r.followUpWindowsInstalled) {
+      followUpCases.push({
+        address: r.followUpAddress || '',
+        duration: r.followUpDuration || '',
+        materialsCut: String(r.materialsCut || ''),
+        materialsSupplemented: String(r.materialsSupplemented || ''),
+        reorders: String(r.reorders || ''),
+        measuringColleague: r.followUpMeasuringColleague || '',
+        reorderLocation: r.reorderLocation || '',
+        responsibility: r.responsibility || '',
+        urgency: r.urgency || '正常',
+        details: r.followUpDetails || '',
+        customerFeedback: r.followUpCustomerFeedback || '',
+        doorsInstalled: String(r.followUpDoorsInstalled || ''),
+        windowsInstalled: String(r.followUpWindowsInstalled || ''),
+        aluminumInstalled: String(r.followUpAluminumInstalled || ''),
+        oldGrillesRemoved: String(r.followUpOldGrillesRemoved || ''),
+      });
+    }
+  });
+
+  return {
+    basicInfo: {
+      date: first.date || '',
+      team: first.team || '',
+      installer1: first.installer1 || '',
+      installer2: first.installer2 || '',
+      installer3: first.installer3 || '',
+      installer4: first.installer4 || '',
+    },
+    completedCases: completedCases.length > 0 ? completedCases : [{ ...emptyCompletedCase }],
+    followUpCases: followUpCases.length > 0 ? followUpCases : [{ ...emptyFollowUpCase }],
+    reportCode: first.reportCode || '',
+  };
+};
+
 const ReportForm = () => {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
@@ -50,7 +109,7 @@ const ReportForm = () => {
   const { username, isAuthenticated, validateSession } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState<ReportFormData>(initialFormData);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(isEditMode);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -68,6 +127,36 @@ const ReportForm = () => {
       cancelled = true;
     };
   }, [isAuthenticated, navigate, validateSession]);
+
+  // Load existing report data in edit mode
+  useEffect(() => {
+    if (!isEditMode || !username || !isAuthenticated) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        setIsLoading(true);
+        const reports = await fetchReportsByCode(username, decodeURIComponent(id!));
+        if (!cancelled && reports.length > 0) {
+          setFormData(reportsToFormData(reports));
+        } else if (!cancelled) {
+          toast.error('找不到該報告');
+          navigate('/my-reports');
+        }
+      } catch (error) {
+        if (!cancelled) {
+          toast.error('載入報告失敗');
+          navigate('/my-reports');
+        }
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isEditMode, id, username, isAuthenticated, navigate]);
 
   const handleBasicInfoChange = (field: keyof ReportFormData['basicInfo'], value: string) => {
     setFormData(prev => ({
@@ -148,8 +237,13 @@ const ReportForm = () => {
     setIsSaving(true);
 
     try {
-      await submitReport(username, formData);
-      toast.success('報告已提交');
+      if (isEditMode) {
+        await updateReport(username, formData);
+        toast.success('報告已更新');
+      } else {
+        await submitReport(username, formData);
+        toast.success('報告已提交');
+      }
       navigate('/my-reports');
     } catch (error) {
       const msg = error instanceof Error ? error.message : '';
@@ -158,7 +252,7 @@ const ReportForm = () => {
         navigate('/');
         return;
       }
-      toast.error('儲存失敗，請重試');
+      toast.error(isEditMode ? '更新失敗，請重試' : '儲存失敗，請重試');
     } finally {
       setIsSaving(false);
     }
