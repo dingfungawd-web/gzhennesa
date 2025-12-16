@@ -42,7 +42,7 @@ export type Database = {
     Functions: {
       hash_password: { Args: { password: string }; Returns: string }
       verify_password: {
-        Args: { password: string; password_hash: string }
+        Args: { input_password: string; stored_hash: string }
         Returns: boolean
       }
     }
