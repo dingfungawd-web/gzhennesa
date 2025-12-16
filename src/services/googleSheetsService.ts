@@ -1,10 +1,16 @@
 import { Report, ReportFormData, BasicInfo } from '@/types/report';
 
 const FUNCTION_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-sheets`;
+const API_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 export async function fetchUserReports(username: string): Promise<Report[]> {
   try {
-    const response = await fetch(`${FUNCTION_URL}?username=${encodeURIComponent(username)}`);
+    const response = await fetch(`${FUNCTION_URL}?username=${encodeURIComponent(username)}`, {
+      headers: {
+        'apikey': API_KEY,
+        'Content-Type': 'application/json',
+      },
+    });
     
     if (!response.ok) {
       throw new Error('Failed to fetch reports');
@@ -153,12 +159,15 @@ export async function submitReport(username: string, formData: ReportFormData): 
     const response = await fetch(FUNCTION_URL, {
       method: 'POST',
       headers: {
+        'apikey': API_KEY,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ rows }),
     });
     
     if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Submit error response:', errorData);
       throw new Error('Failed to submit report');
     }
     
