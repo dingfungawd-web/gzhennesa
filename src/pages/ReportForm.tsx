@@ -17,12 +17,16 @@ import {
   Users,
   MapPin,
   Clock,
-  MessageSquare,
-  Package,
+  FileText,
   AlertCircle,
-  CheckCircle
+  CheckCircle,
+  Plus
 } from 'lucide-react';
 import { toast } from 'sonner';
+
+// Name lists
+const INSTALLERS = ['陳浩嘉', '朱沛儒', '王勇', '陳辉鸿', '小卓'];
+const MEASURING_COLLEAGUES = ['黃仲柱', '彭晨陽', '李偉國'];
 
 const initialFormData: ReportFormData = {
   // 基本資料
@@ -39,26 +43,26 @@ const initialFormData: ReportFormData = {
   measuringColleague: '',
   customerFeedback: '',
   customerWitness: '',
-  doorsInstalled: 0,
-  windowsInstalled: 0,
-  aluminumInstalled: 0,
-  oldGrillesRemoved: 0,
+  doorsInstalled: '',
+  windowsInstalled: '',
+  aluminumInstalled: '',
+  oldGrillesRemoved: '',
   // 需跟進個案
   followUpAddress: '',
   followUpDuration: '',
-  materialsCut: 0,
-  materialsSupplemented: 0,
-  reorders: 0,
+  materialsCut: '',
+  materialsSupplemented: '',
+  reorders: '',
   followUpMeasuringColleague: '',
   reorderLocation: '',
   responsibility: '',
   urgency: '正常',
   followUpDetails: '',
   followUpCustomerFeedback: '',
-  followUpDoorsInstalled: 0,
-  followUpWindowsInstalled: 0,
-  followUpAluminumInstalled: 0,
-  followUpOldGrillesRemoved: 0,
+  followUpDoorsInstalled: '',
+  followUpWindowsInstalled: '',
+  followUpAluminumInstalled: '',
+  followUpOldGrillesRemoved: '',
   reportCode: '',
 };
 
@@ -99,34 +103,34 @@ const ReportForm = () => {
               measuringColleague: report.measuringColleague || '',
               customerFeedback: report.customerFeedback || '',
               customerWitness: report.customerWitness || '',
-              doorsInstalled: report.doorsInstalled || 0,
-              windowsInstalled: report.windowsInstalled || 0,
-              aluminumInstalled: report.aluminumInstalled || 0,
-              oldGrillesRemoved: report.oldGrillesRemoved || 0,
+              doorsInstalled: report.doorsInstalled?.toString() || '',
+              windowsInstalled: report.windowsInstalled?.toString() || '',
+              aluminumInstalled: report.aluminumInstalled?.toString() || '',
+              oldGrillesRemoved: report.oldGrillesRemoved?.toString() || '',
               followUpAddress: report.followUpAddress || '',
               followUpDuration: report.followUpDuration || '',
-              materialsCut: report.materialsCut || 0,
-              materialsSupplemented: report.materialsSupplemented || 0,
-              reorders: report.reorders || 0,
+              materialsCut: report.materialsCut?.toString() || '',
+              materialsSupplemented: report.materialsSupplemented?.toString() || '',
+              reorders: report.reorders?.toString() || '',
               followUpMeasuringColleague: report.followUpMeasuringColleague || '',
               reorderLocation: report.reorderLocation || '',
               responsibility: report.responsibility || '',
               urgency: report.urgency || '正常',
               followUpDetails: report.followUpDetails || '',
               followUpCustomerFeedback: report.followUpCustomerFeedback || '',
-              followUpDoorsInstalled: report.followUpDoorsInstalled || 0,
-              followUpWindowsInstalled: report.followUpWindowsInstalled || 0,
-              followUpAluminumInstalled: report.followUpAluminumInstalled || 0,
-              followUpOldGrillesRemoved: report.followUpOldGrillesRemoved || 0,
+              followUpDoorsInstalled: report.followUpDoorsInstalled?.toString() || '',
+              followUpWindowsInstalled: report.followUpWindowsInstalled?.toString() || '',
+              followUpAluminumInstalled: report.followUpAluminumInstalled?.toString() || '',
+              followUpOldGrillesRemoved: report.followUpOldGrillesRemoved?.toString() || '',
               reportCode: report.reportCode || '',
             });
           } else {
             toast.error('找不到報告或無權限查看');
-            navigate('/dashboard');
+            navigate('/my-reports');
           }
         } catch (error) {
           toast.error('載入報告失敗');
-          navigate('/dashboard');
+          navigate('/my-reports');
         } finally {
           setIsLoading(false);
         }
@@ -137,6 +141,14 @@ const ReportForm = () => {
 
   const handleInputChange = (field: keyof ReportFormData, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Handle numeric input - only allow positive numbers
+  const handleNumericInput = (field: keyof ReportFormData, value: string) => {
+    // Allow empty or numbers only (no negative)
+    if (value === '' || /^\d+$/.test(value)) {
+      setFormData(prev => ({ ...prev, [field]: value }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -152,11 +164,18 @@ const ReportForm = () => {
     try {
       await submitReport(username!, formData);
       toast.success(isEditMode ? '報告已更新' : '報告已提交');
-      navigate('/dashboard');
+      navigate('/my-reports');
     } catch (error) {
       toast.error('儲存失敗，請重試');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
@@ -173,16 +192,22 @@ const ReportForm = () => {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b border-border">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')}>
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            <div>
-              <h1 className="font-semibold text-foreground">
-                {isViewMode ? '查看報告' : isEditMode ? '修改報告' : '新增報告'}
-              </h1>
-              <p className="text-sm text-muted-foreground">{username}</p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="icon" onClick={() => navigate('/my-reports')}>
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+              <div>
+                <h1 className="font-semibold text-foreground">
+                  {isViewMode ? '查看報告' : isEditMode ? '修改報告' : '新增報告'}
+                </h1>
+                <p className="text-sm text-muted-foreground">{username}</p>
+              </div>
             </div>
+            <Button variant="outline" onClick={() => navigate('/my-reports')}>
+              <FileText className="w-4 h-4 mr-2" />
+              我的報告
+            </Button>
           </div>
         </div>
       </header>
@@ -232,56 +257,36 @@ const ReportForm = () => {
                 <Users className="w-5 h-5 text-primary" />
                 安裝同事
               </CardTitle>
-              <CardDescription>填寫參與安裝的同事名稱</CardDescription>
+              <CardDescription>選擇參與安裝的同事</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="installer1">安裝同事 1</Label>
-                <Input
-                  id="installer1"
-                  placeholder="同事名稱"
-                  value={formData.installer1}
-                  onChange={(e) => handleInputChange('installer1', e.target.value)}
-                  disabled={isViewMode}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="installer2">安裝同事 2</Label>
-                <Input
-                  id="installer2"
-                  placeholder="同事名稱"
-                  value={formData.installer2}
-                  onChange={(e) => handleInputChange('installer2', e.target.value)}
-                  disabled={isViewMode}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="installer3">安裝同事 3</Label>
-                <Input
-                  id="installer3"
-                  placeholder="同事名稱"
-                  value={formData.installer3}
-                  onChange={(e) => handleInputChange('installer3', e.target.value)}
-                  disabled={isViewMode}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="installer4">安裝同事 4</Label>
-                <Input
-                  id="installer4"
-                  placeholder="同事名稱"
-                  value={formData.installer4}
-                  onChange={(e) => handleInputChange('installer4', e.target.value)}
-                  disabled={isViewMode}
-                />
-              </div>
+              {[1, 2, 3, 4].map((num) => (
+                <div key={num} className="space-y-2">
+                  <Label>安裝同事 {num}</Label>
+                  <Select
+                    value={formData[`installer${num}` as keyof ReportFormData] as string}
+                    onValueChange={(value) => handleInputChange(`installer${num}` as keyof ReportFormData, value === '_empty' ? '' : value)}
+                    disabled={isViewMode}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="選擇同事" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="_empty">不選擇</SelectItem>
+                      {INSTALLERS.map((name) => (
+                        <SelectItem key={name} value={name}>{name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ))}
             </CardContent>
           </Card>
 
           <Separator />
 
           {/* Completed Cases Section */}
-          <Card className="shadow-card border-border/50">
+          <Card id="completed-cases" className="shadow-card border-border/50">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <CheckCircle className="w-5 h-5 text-green-500" />
@@ -321,13 +326,21 @@ const ReportForm = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="measuringColleague">度尺同事</Label>
-                  <Input
-                    id="measuringColleague"
-                    placeholder="度尺同事名稱"
+                  <Select
                     value={formData.measuringColleague}
-                    onChange={(e) => handleInputChange('measuringColleague', e.target.value)}
+                    onValueChange={(value) => handleInputChange('measuringColleague', value === '_empty' ? '' : value)}
                     disabled={isViewMode}
-                  />
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="選擇度尺同事" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="_empty">不選擇</SelectItem>
+                      {MEASURING_COLLEAGUES.map((name) => (
+                        <SelectItem key={name} value={name}>{name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
@@ -372,44 +385,48 @@ const ReportForm = () => {
                   <Label htmlFor="doorsInstalled">安裝門數</Label>
                   <Input
                     id="doorsInstalled"
-                    type="number"
-                    min="0"
+                    inputMode="numeric"
+                    placeholder="輸入數量"
                     value={formData.doorsInstalled}
-                    onChange={(e) => handleInputChange('doorsInstalled', parseInt(e.target.value) || 0)}
+                    onChange={(e) => handleNumericInput('doorsInstalled', e.target.value)}
                     disabled={isViewMode}
+                    className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="windowsInstalled">安裝窗數</Label>
                   <Input
                     id="windowsInstalled"
-                    type="number"
-                    min="0"
+                    inputMode="numeric"
+                    placeholder="輸入數量"
                     value={formData.windowsInstalled}
-                    onChange={(e) => handleInputChange('windowsInstalled', parseInt(e.target.value) || 0)}
+                    onChange={(e) => handleNumericInput('windowsInstalled', e.target.value)}
                     disabled={isViewMode}
+                    className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="aluminumInstalled">安裝鋁料數</Label>
                   <Input
                     id="aluminumInstalled"
-                    type="number"
-                    min="0"
+                    inputMode="numeric"
+                    placeholder="輸入數量"
                     value={formData.aluminumInstalled}
-                    onChange={(e) => handleInputChange('aluminumInstalled', parseInt(e.target.value) || 0)}
+                    onChange={(e) => handleNumericInput('aluminumInstalled', e.target.value)}
                     disabled={isViewMode}
+                    className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="oldGrillesRemoved">拆舊拆拉釘窗花數</Label>
                   <Input
                     id="oldGrillesRemoved"
-                    type="number"
-                    min="0"
+                    inputMode="numeric"
+                    placeholder="輸入數量"
                     value={formData.oldGrillesRemoved}
-                    onChange={(e) => handleInputChange('oldGrillesRemoved', parseInt(e.target.value) || 0)}
+                    onChange={(e) => handleNumericInput('oldGrillesRemoved', e.target.value)}
                     disabled={isViewMode}
+                    className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
               </div>
@@ -419,7 +436,7 @@ const ReportForm = () => {
           <Separator />
 
           {/* Follow-up Cases Section */}
-          <Card className="shadow-card border-border/50">
+          <Card id="followup-cases" className="shadow-card border-border/50">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <AlertCircle className="w-5 h-5 text-warning" />
@@ -459,13 +476,21 @@ const ReportForm = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="followUpMeasuringColleague">度尺同事</Label>
-                  <Input
-                    id="followUpMeasuringColleague"
-                    placeholder="度尺同事名稱"
+                  <Select
                     value={formData.followUpMeasuringColleague}
-                    onChange={(e) => handleInputChange('followUpMeasuringColleague', e.target.value)}
+                    onValueChange={(value) => handleInputChange('followUpMeasuringColleague', value === '_empty' ? '' : value)}
                     disabled={isViewMode}
-                  />
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="選擇度尺同事" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="_empty">不選擇</SelectItem>
+                      {MEASURING_COLLEAGUES.map((name) => (
+                        <SelectItem key={name} value={name}>{name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
@@ -474,33 +499,36 @@ const ReportForm = () => {
                   <Label htmlFor="materialsCut">開料數</Label>
                   <Input
                     id="materialsCut"
-                    type="number"
-                    min="0"
+                    inputMode="numeric"
+                    placeholder="輸入數量"
                     value={formData.materialsCut}
-                    onChange={(e) => handleInputChange('materialsCut', parseInt(e.target.value) || 0)}
+                    onChange={(e) => handleNumericInput('materialsCut', e.target.value)}
                     disabled={isViewMode}
+                    className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="materialsSupplemented">補料數</Label>
                   <Input
                     id="materialsSupplemented"
-                    type="number"
-                    min="0"
+                    inputMode="numeric"
+                    placeholder="輸入數量"
                     value={formData.materialsSupplemented}
-                    onChange={(e) => handleInputChange('materialsSupplemented', parseInt(e.target.value) || 0)}
+                    onChange={(e) => handleNumericInput('materialsSupplemented', e.target.value)}
                     disabled={isViewMode}
+                    className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="reorders">重訂數</Label>
                   <Input
                     id="reorders"
-                    type="number"
-                    min="0"
+                    inputMode="numeric"
+                    placeholder="輸入數量"
                     value={formData.reorders}
-                    onChange={(e) => handleInputChange('reorders', parseInt(e.target.value) || 0)}
+                    onChange={(e) => handleNumericInput('reorders', e.target.value)}
                     disabled={isViewMode}
+                    className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
                 <div className="space-y-2">
@@ -520,13 +548,14 @@ const ReportForm = () => {
                   <Label htmlFor="responsibility">責任選項</Label>
                   <Select
                     value={formData.responsibility}
-                    onValueChange={(value) => handleInputChange('responsibility', value)}
+                    onValueChange={(value) => handleInputChange('responsibility', value === '_empty' ? '' : value)}
                     disabled={isViewMode}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="選擇責任方" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="_empty">不選擇</SelectItem>
                       <SelectItem value="安裝">安裝</SelectItem>
                       <SelectItem value="度尺">度尺</SelectItem>
                       <SelectItem value="廠方">廠方</SelectItem>
@@ -592,49 +621,79 @@ const ReportForm = () => {
                   <Label htmlFor="followUpDoorsInstalled">安裝門數</Label>
                   <Input
                     id="followUpDoorsInstalled"
-                    type="number"
-                    min="0"
+                    inputMode="numeric"
+                    placeholder="輸入數量"
                     value={formData.followUpDoorsInstalled}
-                    onChange={(e) => handleInputChange('followUpDoorsInstalled', parseInt(e.target.value) || 0)}
+                    onChange={(e) => handleNumericInput('followUpDoorsInstalled', e.target.value)}
                     disabled={isViewMode}
+                    className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="followUpWindowsInstalled">安裝窗數</Label>
                   <Input
                     id="followUpWindowsInstalled"
-                    type="number"
-                    min="0"
+                    inputMode="numeric"
+                    placeholder="輸入數量"
                     value={formData.followUpWindowsInstalled}
-                    onChange={(e) => handleInputChange('followUpWindowsInstalled', parseInt(e.target.value) || 0)}
+                    onChange={(e) => handleNumericInput('followUpWindowsInstalled', e.target.value)}
                     disabled={isViewMode}
+                    className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="followUpAluminumInstalled">安裝鋁料數</Label>
                   <Input
                     id="followUpAluminumInstalled"
-                    type="number"
-                    min="0"
+                    inputMode="numeric"
+                    placeholder="輸入數量"
                     value={formData.followUpAluminumInstalled}
-                    onChange={(e) => handleInputChange('followUpAluminumInstalled', parseInt(e.target.value) || 0)}
+                    onChange={(e) => handleNumericInput('followUpAluminumInstalled', e.target.value)}
                     disabled={isViewMode}
+                    className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="followUpOldGrillesRemoved">拆舊拆拉釘窗花數</Label>
                   <Input
                     id="followUpOldGrillesRemoved"
-                    type="number"
-                    min="0"
+                    inputMode="numeric"
+                    placeholder="輸入數量"
                     value={formData.followUpOldGrillesRemoved}
-                    onChange={(e) => handleInputChange('followUpOldGrillesRemoved', parseInt(e.target.value) || 0)}
+                    onChange={(e) => handleNumericInput('followUpOldGrillesRemoved', e.target.value)}
                     disabled={isViewMode}
+                    className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
               </div>
             </CardContent>
           </Card>
+
+          {/* Quick Navigation Buttons */}
+          {!isViewMode && (
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1 gap-2"
+                onClick={() => scrollToSection('completed-cases')}
+              >
+                <Plus className="w-4 h-4" />
+                <CheckCircle className="w-4 h-4 text-green-500" />
+                新增已完成個案
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1 gap-2"
+                onClick={() => scrollToSection('followup-cases')}
+              >
+                <Plus className="w-4 h-4" />
+                <AlertCircle className="w-4 h-4 text-warning" />
+                新增需跟進個案
+              </Button>
+            </div>
+          )}
 
           {/* Submit Button */}
           {!isViewMode && (
@@ -642,7 +701,7 @@ const ReportForm = () => {
               <Button 
                 type="button" 
                 variant="outline" 
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/my-reports')}
               >
                 取消
               </Button>
