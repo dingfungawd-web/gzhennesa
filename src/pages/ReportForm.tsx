@@ -29,14 +29,12 @@ const INSTALLERS = ['陳浩嘉', '朱沛儒', '王勇', '陳辉鸿', '小卓'];
 const MEASURING_COLLEAGUES = ['黃仲柱', '彭晨陽', '李偉國'];
 
 const initialFormData: ReportFormData = {
-  // 基本資料
   date: new Date().toISOString().split('T')[0],
   team: '',
   installer1: '',
   installer2: '',
   installer3: '',
   installer4: '',
-  // 已完成個案
   address: '',
   actualDuration: '',
   difficulties: '',
@@ -47,7 +45,6 @@ const initialFormData: ReportFormData = {
   windowsInstalled: '',
   aluminumInstalled: '',
   oldGrillesRemoved: '',
-  // 需跟進個案
   followUpAddress: '',
   followUpDuration: '',
   materialsCut: '',
@@ -143,9 +140,7 @@ const ReportForm = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  // Handle numeric input - only allow positive numbers
   const handleNumericInput = (field: keyof ReportFormData, value: string) => {
-    // Allow empty or numbers only (no negative)
     if (value === '' || /^\d+$/.test(value)) {
       setFormData(prev => ({ ...prev, [field]: value }));
     }
@@ -189,7 +184,6 @@ const ReportForm = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b border-border">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -212,7 +206,6 @@ const ReportForm = () => {
         </div>
       </header>
 
-      {/* Form */}
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         <form onSubmit={handleSubmit} className="space-y-6 animate-fade-in">
           {/* Basic Info */}
@@ -432,6 +425,20 @@ const ReportForm = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Add Completed Case Button */}
+          {!isViewMode && (
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full gap-2"
+              onClick={() => scrollToSection('completed-cases')}
+            >
+              <Plus className="w-4 h-4" />
+              <CheckCircle className="w-4 h-4 text-green-500" />
+              新增已完成個案
+            </Button>
+          )}
 
           <Separator />
 
@@ -669,30 +676,18 @@ const ReportForm = () => {
             </CardContent>
           </Card>
 
-          {/* Quick Navigation Buttons */}
+          {/* Add Follow-up Case Button */}
           {!isViewMode && (
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button
-                type="button"
-                variant="outline"
-                className="flex-1 gap-2"
-                onClick={() => scrollToSection('completed-cases')}
-              >
-                <Plus className="w-4 h-4" />
-                <CheckCircle className="w-4 h-4 text-green-500" />
-                新增已完成個案
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="flex-1 gap-2"
-                onClick={() => scrollToSection('followup-cases')}
-              >
-                <Plus className="w-4 h-4" />
-                <AlertCircle className="w-4 h-4 text-warning" />
-                新增需跟進個案
-              </Button>
-            </div>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full gap-2"
+              onClick={() => scrollToSection('followup-cases')}
+            >
+              <Plus className="w-4 h-4" />
+              <AlertCircle className="w-4 h-4 text-warning" />
+              新增需跟進個案
+            </Button>
           )}
 
           {/* Submit Button */}
