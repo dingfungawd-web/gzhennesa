@@ -47,18 +47,27 @@ const ReportForm = () => {
   const [searchParams] = useSearchParams();
   const isViewMode = searchParams.get('view') === 'true';
   const isEditMode = !!id && id !== 'new';
-  const { username, isAuthenticated } = useAuth();
+  const { username, isAuthenticated, validateSession } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState<ReportFormData>(initialFormData);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/');
-      return;
-    }
-  }, [isAuthenticated, navigate]);
+    if (isAuthenticated) return;
+
+    let cancelled = false;
+    (async () => {
+      const ok = await validateSession();
+      if (!cancelled && !ok) {
+        navigate('/');
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, navigate, validateSession]);
 
   const handleBasicInfoChange = (field: keyof ReportFormData['basicInfo'], value: string) => {
     setFormData(prev => ({
