@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Report } from '@/types/report';
+import { fetchUserReports } from '@/services/googleSheetsService';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -37,16 +38,16 @@ const Dashboard = () => {
       return;
     }
 
-    // Load reports from localStorage (will be replaced with Google Sheets API)
-    const loadReports = () => {
-      const storedReports = localStorage.getItem('reports');
-      if (storedReports) {
-        const allReports: Report[] = JSON.parse(storedReports);
-        // Filter reports by current username
-        const userReports = allReports.filter(r => r.username === username);
+    const loadReports = async () => {
+      try {
+        const userReports = await fetchUserReports(username!);
         setReports(userReports);
+      } catch (error) {
+        console.error('Failed to load reports:', error);
+        toast.error('載入報告失敗');
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     loadReports();
@@ -62,12 +63,12 @@ const Dashboard = () => {
     navigate('/report/new');
   };
 
-  const handleEditReport = (reportId: string) => {
-    navigate(`/report/${reportId}`);
+  const handleEditReport = (reportCode: string) => {
+    navigate(`/report/${encodeURIComponent(reportCode)}`);
   };
 
-  const handleViewReport = (reportId: string) => {
-    navigate(`/report/${reportId}?view=true`);
+  const handleViewReport = (reportCode: string) => {
+    navigate(`/report/${encodeURIComponent(reportCode)}?view=true`);
   };
 
   return (
@@ -191,8 +192,8 @@ const Dashboard = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {reports.map((report) => (
-                      <TableRow key={report.id} className="group">
+                    {reports.map((report, index) => (
+                      <TableRow key={report.reportCode || index} className="group">
                         <TableCell className="font-medium">
                           <div className="flex items-center gap-2">
                             <Calendar className="w-4 h-4 text-muted-foreground" />
@@ -220,14 +221,14 @@ const Dashboard = () => {
                             <Button 
                               variant="ghost" 
                               size="sm"
-                              onClick={() => handleViewReport(report.id)}
+                              onClick={() => handleViewReport(report.reportCode || report.id)}
                             >
                               <Eye className="w-4 h-4" />
                             </Button>
                             <Button 
                               variant="ghost" 
                               size="sm"
-                              onClick={() => handleEditReport(report.id)}
+                              onClick={() => handleEditReport(report.reportCode || report.id)}
                             >
                               <FileEdit className="w-4 h-4" />
                             </Button>

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Report, ReportFormData } from '@/types/report';
+import { fetchUserReports, submitReport } from '@/services/googleSheetsService';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -70,44 +71,50 @@ const ReportForm = () => {
 
     if (isEditMode) {
       setIsLoading(true);
-      const storedReports = localStorage.getItem('reports');
-      if (storedReports) {
-        const reports: Report[] = JSON.parse(storedReports);
-        const report = reports.find(r => r.id === id && r.username === username);
-        if (report) {
-          setFormData({
-            date: report.date,
-            team: report.team,
-            installer1: report.installer1,
-            installer2: report.installer2,
-            installer3: report.installer3,
-            installer4: report.installer4,
-            address: report.address,
-            actualDuration: report.actualDuration,
-            difficulties: report.difficulties,
-            measuringColleague: report.measuringColleague,
-            customerFeedback: report.customerFeedback,
-            customerWitness: report.customerWitness,
-            doorsInstalled: report.doorsInstalled,
-            windowsInstalled: report.windowsInstalled,
-            aluminumInstalled: report.aluminumInstalled,
-            oldGrillesRemoved: report.oldGrillesRemoved,
-            amendmentAddress: report.amendmentAddress,
-            materialsCut: report.materialsCut,
-            materialsSupplemented: report.materialsSupplemented,
-            reorders: report.reorders,
-            reorderLocation: report.reorderLocation,
-            responsibility: report.responsibility,
-            urgency: report.urgency,
-            followUpDetails: report.followUpDetails,
-            reportCode: report.reportCode,
-          });
-        } else {
-          toast.error('找不到報告或無權限查看');
+      const loadReport = async () => {
+        try {
+          const reports = await fetchUserReports(username!);
+          const report = reports.find(r => r.reportCode === id || r.id === id);
+          if (report) {
+            setFormData({
+              date: report.date,
+              team: report.team,
+              installer1: report.installer1,
+              installer2: report.installer2,
+              installer3: report.installer3,
+              installer4: report.installer4,
+              address: report.address,
+              actualDuration: report.actualDuration,
+              difficulties: report.difficulties,
+              measuringColleague: report.measuringColleague,
+              customerFeedback: report.customerFeedback,
+              customerWitness: report.customerWitness,
+              doorsInstalled: report.doorsInstalled,
+              windowsInstalled: report.windowsInstalled,
+              aluminumInstalled: report.aluminumInstalled,
+              oldGrillesRemoved: report.oldGrillesRemoved,
+              amendmentAddress: report.amendmentAddress,
+              materialsCut: report.materialsCut,
+              materialsSupplemented: report.materialsSupplemented,
+              reorders: report.reorders,
+              reorderLocation: report.reorderLocation,
+              responsibility: report.responsibility,
+              urgency: report.urgency,
+              followUpDetails: report.followUpDetails,
+              reportCode: report.reportCode,
+            });
+          } else {
+            toast.error('找不到報告或無權限查看');
+            navigate('/dashboard');
+          }
+        } catch (error) {
+          toast.error('載入報告失敗');
           navigate('/dashboard');
+        } finally {
+          setIsLoading(false);
         }
-      }
-      setIsLoading(false);
+      };
+      loadReport();
     }
   }, [isAuthenticated, isEditMode, id, username, navigate]);
 
@@ -126,35 +133,8 @@ const ReportForm = () => {
     setIsSaving(true);
 
     try {
-      const storedReports = localStorage.getItem('reports');
-      let reports: Report[] = storedReports ? JSON.parse(storedReports) : [];
-
-      if (isEditMode) {
-        reports = reports.map(r => {
-          if (r.id === id && r.username === username) {
-            return {
-              ...r,
-              ...formData,
-              updatedAt: new Date().toISOString(),
-            };
-          }
-          return r;
-        });
-        toast.success('報告已更新');
-      } else {
-        const newReport: Report = {
-          id: crypto.randomUUID(),
-          username: username!,
-          ...formData,
-          reportCode: `RPT-${Date.now().toString(36).toUpperCase()}`,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        reports.push(newReport);
-        toast.success('報告已提交');
-      }
-
-      localStorage.setItem('reports', JSON.stringify(reports));
+      await submitReport(username!, formData);
+      toast.success(isEditMode ? '報告已更新' : '報告已提交');
       navigate('/dashboard');
     } catch (error) {
       toast.error('儲存失敗，請重試');
