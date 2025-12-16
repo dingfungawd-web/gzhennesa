@@ -29,7 +29,7 @@ const Login = () => {
     
     login(username.trim());
     toast.success(`歡迎，${username}！`);
-    navigate('/dashboard');
+    navigate('/report/new');
     
     setIsLoading(false);
   };

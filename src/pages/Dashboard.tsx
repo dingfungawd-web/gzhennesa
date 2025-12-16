@@ -148,7 +148,7 @@ const Dashboard = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-foreground">
-                    {reports.reduce((sum, r) => sum + r.doorsInstalled + r.windowsInstalled, 0)}
+                    {reports.reduce((sum, r) => sum + (Number(r.doorsInstalled) || 0) + (Number(r.windowsInstalled) || 0), 0)}
                   </p>
                   <p className="text-sm text-muted-foreground">總安裝數</p>
                 </div>
