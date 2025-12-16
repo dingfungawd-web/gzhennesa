@@ -98,7 +98,7 @@ serve(async (req) => {
     }
     
     if (req.method === 'POST') {
-      // Add or update a report
+      // Add a report
       const body = await req.json();
       
       // Validate request body structure
@@ -135,6 +135,51 @@ serve(async (req) => {
       
       const data = await response.json();
       console.log('Apps Script POST response received');
+      
+      return new Response(JSON.stringify(data), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (req.method === 'PUT') {
+      // Update existing report
+      const body = await req.json();
+      
+      if (!body || !body.reportCode || !body.rows || !Array.isArray(body.rows)) {
+        return new Response(JSON.stringify({ error: 'Invalid request body' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      const sanitizedRows = body.rows.map((row: string[]) => {
+        if (!Array.isArray(row)) {
+          throw new Error('Invalid row format');
+        }
+        const sanitizedRow = row.map((cell, index) => {
+          if (index === 0) {
+            return authenticatedUsername;
+          }
+          return typeof cell === 'string' ? sanitizeString(cell) : String(cell || '');
+        });
+        return sanitizedRow;
+      });
+      
+      console.log('Updating report for user:', authenticatedUsername, 'reportCode:', body.reportCode);
+      
+      const response = await fetch(appsScriptUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          action: 'update',
+          reportCode: body.reportCode,
+          username: authenticatedUsername,
+          rows: sanitizedRows 
+        }),
+      });
+      
+      const data = await response.json();
+      console.log('Apps Script UPDATE response received');
       
       return new Response(JSON.stringify(data), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

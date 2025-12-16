@@ -230,7 +230,11 @@ const Dashboard = () => {
                     {reports.map((report, index) => {
                       const caseType = getCaseType(report);
                       return (
-                        <TableRow key={`${report.reportCode}-${index}`} className="group">
+                        <TableRow 
+                          key={`${report.reportCode}-${index}`} 
+                          className="group cursor-pointer hover:bg-muted/50"
+                          onClick={() => navigate(`/report/${encodeURIComponent(report.reportCode || report.id)}`)}
+                        >
                           <TableCell>
                             {caseType === 'completed' ? (
                               <Badge variant="default" className="bg-green-500/10 text-green-600 hover:bg-green-500/20">

@@ -35,7 +35,7 @@ export async function fetchUserReports(username: string): Promise<Report[]> {
     // Data comes as array of arrays (rows), transform to Report objects
     return rows.map((row: any[], index: number) => {
       const report: Report = {
-        id: row[32] || `temp-${index}`, // AG - report code
+        id: row[33] || `temp-${index}`, // AH - report code
         username: row[0] || '',
         date: row[1] || '',
         team: row[2] || '',
@@ -68,7 +68,7 @@ export async function fetchUserReports(username: string): Promise<Report[]> {
         followUpWindowsInstalled: row[29] || '',
         followUpAluminumInstalled: row[30] || '',
         followUpOldGrillesRemoved: row[31] || '',
-        reportCode: row[32] || '',
+        reportCode: row[33] || '', // AH column
         createdAt: row[1] || new Date().toISOString(),
         updatedAt: row[1] || new Date().toISOString(),
       };
@@ -79,6 +79,11 @@ export async function fetchUserReports(username: string): Promise<Report[]> {
     console.error('Error fetching reports:', error);
     throw error;
   }
+}
+
+export async function fetchReportsByCode(username: string, reportCode: string): Promise<Report[]> {
+  const allReports = await fetchUserReports(username);
+  return allReports.filter(r => r.reportCode === reportCode);
 }
 
 export async function submitReport(username: string, formData: ReportFormData): Promise<boolean> {
@@ -112,23 +117,8 @@ export async function submitReport(username: string, formData: ReportFormData): 
           caseData.windowsInstalled, // O - windows
           caseData.aluminumInstalled, // P - aluminum
           caseData.oldGrillesRemoved, // Q - old grilles
-          '',
-          '',
-          '',
-          '',
-          '',
-          '',
-          '',
-          '',
-          '',
-          '',
-          '',
-          '',
-          '',
-          '',
-          '',
-          '', // R-AF empty for completed case
-          reportCode, // AG - report code
+          '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', // R-AG empty for completed case
+          reportCode, // AH - report code
         ];
         rows.push(row);
       }
@@ -146,16 +136,7 @@ export async function submitReport(username: string, formData: ReportFormData): 
           basicInfo.installer2, // E - installer2
           basicInfo.installer3, // F - installer3
           basicInfo.installer4, // G - installer4
-          '',
-          '',
-          '',
-          '',
-          '',
-          '',
-          '',
-          '',
-          '',
-          '', // H-Q empty for follow-up case
+          '', '', '', '', '', '', '', '', '', '', // H-Q empty for follow-up case
           caseData.address, // R - address
           caseData.duration, // S - duration
           caseData.materialsCut, // T - materials cut
@@ -171,7 +152,8 @@ export async function submitReport(username: string, formData: ReportFormData): 
           caseData.windowsInstalled, // AD - windows
           caseData.aluminumInstalled, // AE - aluminum
           caseData.oldGrillesRemoved, // AF - old grilles
-          reportCode, // AG - report code
+          '', // AG - empty
+          reportCode, // AH - report code
         ];
         rows.push(row);
       }
@@ -187,32 +169,9 @@ export async function submitReport(username: string, formData: ReportFormData): 
         basicInfo.installer2,
         basicInfo.installer3,
         basicInfo.installer4,
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '', // H-Q
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '', // R-AF
-        reportCode,
+        '', '', '', '', '', '', '', '', '', '', // H-Q
+        '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', // R-AG
+        reportCode, // AH
       ];
       rows.push(row);
     }
@@ -237,6 +196,116 @@ export async function submitReport(username: string, formData: ReportFormData): 
     return result.success === true;
   } catch (error) {
     console.error('Error submitting report:', error);
+    throw error;
+  }
+}
+
+export async function updateReport(username: string, formData: ReportFormData): Promise<boolean> {
+  try {
+    const reportCode = formData.reportCode;
+    if (!reportCode) {
+      throw new Error('Report code is required for update');
+    }
+
+    const basicInfo = formData.basicInfo;
+    const rows: any[][] = [];
+
+    // Build completed case rows
+    formData.completedCases.forEach((caseData) => {
+      if (caseData.address || caseData.doorsInstalled || caseData.windowsInstalled) {
+        const row = [
+          username,
+          basicInfo.date,
+          basicInfo.team,
+          basicInfo.installer1,
+          basicInfo.installer2,
+          basicInfo.installer3,
+          basicInfo.installer4,
+          caseData.address,
+          caseData.actualDuration,
+          caseData.difficulties,
+          caseData.measuringColleague,
+          caseData.customerFeedback,
+          caseData.customerWitness,
+          caseData.doorsInstalled,
+          caseData.windowsInstalled,
+          caseData.aluminumInstalled,
+          caseData.oldGrillesRemoved,
+          '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+          reportCode,
+        ];
+        rows.push(row);
+      }
+    });
+
+    // Build follow-up case rows
+    formData.followUpCases.forEach((caseData) => {
+      if (caseData.address || caseData.doorsInstalled || caseData.windowsInstalled) {
+        const row = [
+          username,
+          basicInfo.date,
+          basicInfo.team,
+          basicInfo.installer1,
+          basicInfo.installer2,
+          basicInfo.installer3,
+          basicInfo.installer4,
+          '', '', '', '', '', '', '', '', '', '',
+          caseData.address,
+          caseData.duration,
+          caseData.materialsCut,
+          caseData.materialsSupplemented,
+          caseData.reorders,
+          caseData.measuringColleague,
+          caseData.reorderLocation,
+          caseData.responsibility,
+          caseData.urgency,
+          caseData.details,
+          caseData.customerFeedback,
+          caseData.doorsInstalled,
+          caseData.windowsInstalled,
+          caseData.aluminumInstalled,
+          caseData.oldGrillesRemoved,
+          '',
+          reportCode,
+        ];
+        rows.push(row);
+      }
+    });
+
+    if (rows.length === 0) {
+      const row = [
+        username,
+        basicInfo.date,
+        basicInfo.team,
+        basicInfo.installer1,
+        basicInfo.installer2,
+        basicInfo.installer3,
+        basicInfo.installer4,
+        '', '', '', '', '', '', '', '', '', '',
+        '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+        reportCode,
+      ];
+      rows.push(row);
+    }
+
+    const response = await fetch(FUNCTION_URL, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ reportCode, rows }),
+    });
+
+    if (response.status === 401) {
+      throw new Error('Session expired');
+    }
+
+    if (!response.ok) {
+      throw new Error('Failed to update report');
+    }
+
+    const result = await response.json();
+    return result.success === true;
+  } catch (error) {
+    console.error('Error updating report:', error);
     throw error;
   }
 }
