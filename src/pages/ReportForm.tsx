@@ -124,6 +124,12 @@ const ReportForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!username) {
+      toast.error('登入狀態已失效，請重新登入');
+      navigate('/');
+      return;
+    }
     
     if (!formData.basicInfo.date || !formData.basicInfo.team) {
       toast.error('請填寫必要欄位（日期、分隊）');
@@ -133,10 +139,16 @@ const ReportForm = () => {
     setIsSaving(true);
 
     try {
-      await submitReport(username!, formData);
+      await submitReport(username, formData);
       toast.success('報告已提交');
       navigate('/my-reports');
     } catch (error) {
+      const msg = error instanceof Error ? error.message : '';
+      if (msg.includes('Session expired')) {
+        toast.error('登入狀態已失效，請重新登入');
+        navigate('/');
+        return;
+      }
       toast.error('儲存失敗，請重試');
     } finally {
       setIsSaving(false);
