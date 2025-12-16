@@ -18,11 +18,12 @@ import {
   ClipboardList, 
   Plus, 
   LogOut, 
-  FileEdit, 
   Calendar,
   MapPin,
   Users,
-  Eye
+  CheckCircle,
+  AlertCircle,
+  RefreshCw
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -32,23 +33,24 @@ const Dashboard = () => {
   const [reports, setReports] = useState<Report[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const loadReports = async () => {
+    try {
+      setIsLoading(true);
+      const userReports = await fetchUserReports(username!);
+      setReports(userReports);
+    } catch (error) {
+      console.error('Failed to load reports:', error);
+      toast.error('載入報告失敗');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/');
       return;
     }
-
-    const loadReports = async () => {
-      try {
-        const userReports = await fetchUserReports(username!);
-        setReports(userReports);
-      } catch (error) {
-        console.error('Failed to load reports:', error);
-        toast.error('載入報告失敗');
-      } finally {
-        setIsLoading(false);
-      }
-    };
 
     loadReports();
   }, [isAuthenticated, navigate, username]);
@@ -63,12 +65,32 @@ const Dashboard = () => {
     navigate('/report/new');
   };
 
-  const handleEditReport = (reportCode: string) => {
-    navigate(`/report/${encodeURIComponent(reportCode)}`);
+  const handleRefresh = () => {
+    loadReports();
+    toast.success('已刷新');
   };
 
-  const handleViewReport = (reportCode: string) => {
-    navigate(`/report/${encodeURIComponent(reportCode)}?view=true`);
+  // Determine case type based on which fields have data
+  const getCaseType = (report: Report): 'completed' | 'followup' | 'unknown' => {
+    if (report.address || report.doorsInstalled || report.windowsInstalled) {
+      return 'completed';
+    }
+    if (report.followUpAddress || report.followUpDoorsInstalled || report.followUpWindowsInstalled) {
+      return 'followup';
+    }
+    return 'unknown';
+  };
+
+  const getDisplayAddress = (report: Report): string => {
+    return report.address || report.followUpAddress || '-';
+  };
+
+  const getDisplayDoors = (report: Report): string | number => {
+    return report.doorsInstalled || report.followUpDoorsInstalled || '-';
+  };
+
+  const getDisplayWindows = (report: Report): string | number => {
+    return report.windowsInstalled || report.followUpWindowsInstalled || '-';
   };
 
   return (
@@ -99,12 +121,18 @@ const Dashboard = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
             <h2 className="text-2xl font-bold text-foreground">我的報告</h2>
-            <p className="text-muted-foreground">查看及管理您提交的安裝報告</p>
+            <p className="text-muted-foreground">查看及管理您提交的安裝報告（從Google Sheet同步）</p>
           </div>
-          <Button onClick={handleNewReport} className="gradient-primary text-primary-foreground gap-2">
-            <Plus className="w-4 h-4" />
-            新增報告
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleRefresh} className="gap-2">
+              <RefreshCw className="w-4 h-4" />
+              刷新
+            </Button>
+            <Button onClick={handleNewReport} className="gradient-primary text-primary-foreground gap-2">
+              <Plus className="w-4 h-4" />
+              新增報告
+            </Button>
+          </div>
         </div>
 
         {/* Stats Cards */}
@@ -117,7 +145,7 @@ const Dashboard = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-foreground">{reports.length}</p>
-                  <p className="text-sm text-muted-foreground">總報告數</p>
+                  <p className="text-sm text-muted-foreground">總記錄數</p>
                 </div>
               </div>
             </CardContent>
@@ -125,17 +153,14 @@ const Dashboard = () => {
           <Card className="shadow-card border-border/50">
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
-                  <Calendar className="w-6 h-6 text-success" />
+                <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center">
+                  <CheckCircle className="w-6 h-6 text-green-500" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-foreground">
-                    {reports.filter(r => {
-                      const today = new Date().toISOString().split('T')[0];
-                      return r.date === today;
-                    }).length}
+                    {reports.filter(r => getCaseType(r) === 'completed').length}
                   </p>
-                  <p className="text-sm text-muted-foreground">今日報告</p>
+                  <p className="text-sm text-muted-foreground">已完成個案</p>
                 </div>
               </div>
             </CardContent>
@@ -143,14 +168,14 @@ const Dashboard = () => {
           <Card className="shadow-card border-border/50">
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
-                  <Users className="w-6 h-6 text-accent" />
+                <div className="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center">
+                  <AlertCircle className="w-6 h-6 text-warning" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-foreground">
-                    {reports.reduce((sum, r) => sum + (Number(r.doorsInstalled) || 0) + (Number(r.windowsInstalled) || 0), 0)}
+                    {reports.filter(r => getCaseType(r) === 'followup').length}
                   </p>
-                  <p className="text-sm text-muted-foreground">總安裝數</p>
+                  <p className="text-sm text-muted-foreground">需跟進個案</p>
                 </div>
               </div>
             </CardContent>
@@ -161,7 +186,7 @@ const Dashboard = () => {
         <Card className="shadow-card border-border/50">
           <CardHeader>
             <CardTitle>報告列表</CardTitle>
-            <CardDescription>您提交的所有安裝報告</CardDescription>
+            <CardDescription>您在Google Sheet中的所有安裝報告記錄</CardDescription>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -182,60 +207,60 @@ const Dashboard = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead>類型</TableHead>
                       <TableHead>日期</TableHead>
                       <TableHead>分隊</TableHead>
                       <TableHead>地址</TableHead>
                       <TableHead className="text-center">門數</TableHead>
                       <TableHead className="text-center">窗數</TableHead>
                       <TableHead>報告編號</TableHead>
-                      <TableHead className="text-right">操作</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {reports.map((report, index) => (
-                      <TableRow key={report.reportCode || index} className="group">
-                        <TableCell className="font-medium">
-                          <div className="flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-muted-foreground" />
-                            {report.date}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="secondary">{report.team}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2 max-w-[200px]">
-                            <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                            <span className="truncate">{report.address}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-center">{report.doorsInstalled}</TableCell>
-                        <TableCell className="text-center">{report.windowsInstalled}</TableCell>
-                        <TableCell>
-                          <code className="text-xs bg-muted px-2 py-1 rounded">
-                            {report.reportCode || '-'}
-                          </code>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => handleViewReport(report.reportCode || report.id)}
-                            >
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => handleEditReport(report.reportCode || report.id)}
-                            >
-                              <FileEdit className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {reports.map((report, index) => {
+                      const caseType = getCaseType(report);
+                      return (
+                        <TableRow key={`${report.reportCode}-${index}`} className="group">
+                          <TableCell>
+                            {caseType === 'completed' ? (
+                              <Badge variant="default" className="bg-green-500/10 text-green-600 hover:bg-green-500/20">
+                                <CheckCircle className="w-3 h-3 mr-1" />
+                                已完成
+                              </Badge>
+                            ) : caseType === 'followup' ? (
+                              <Badge variant="default" className="bg-warning/10 text-warning hover:bg-warning/20">
+                                <AlertCircle className="w-3 h-3 mr-1" />
+                                需跟進
+                              </Badge>
+                            ) : (
+                              <Badge variant="secondary">-</Badge>
+                            )}
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="w-4 h-4 text-muted-foreground" />
+                              {report.date}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="secondary">{report.team || '-'}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2 max-w-[200px]">
+                              <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                              <span className="truncate">{getDisplayAddress(report)}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-center">{getDisplayDoors(report)}</TableCell>
+                          <TableCell className="text-center">{getDisplayWindows(report)}</TableCell>
+                          <TableCell>
+                            <code className="text-xs bg-muted px-2 py-1 rounded">
+                              {report.reportCode || '-'}
+                            </code>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>
