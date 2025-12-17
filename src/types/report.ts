@@ -114,7 +114,7 @@ export const emptyFollowUpCase: FollowUpCase = {
   measuringColleague: '',
   reorderLocation: '',
   responsibility: '',
-  urgency: '正常',
+  urgency: '',
   details: '',
   customerFeedback: '',
   doorsInstalled: '',
