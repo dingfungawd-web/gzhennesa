@@ -25,6 +25,12 @@ const readJsonFromResponse = async (response: Response) => {
   }
 };
 
+// New column mapping (A-AI = 35 columns):
+// A(0): Name, B(1): 日期, C(2): 分隊, D(3): 安裝同事1, E(4): 安裝同事2, F(5): 安裝同事3, G(6): 安裝同事4
+// Completed: H(7): 地址, I(8): 安裝實際時長, J(9): 度尺同事預計時長, K(10): 現場困難, L(11): 度尺同事, M(12): 客戶反饋, N(13): 客戶親證, O(14): 封陽台數, P(15): 安裝門數, Q(16): 安裝窗數, R(17): 安裝鋁料數, S(18): 拆舊數
+// Follow-up: T(19): 地址, U(20): 安裝實際時長, V(21): 度尺同事預計時長, W(22): 重訂數, X(23): 度尺同事, Y(24): 重訂位置, Z(25): 責任選項, AA(26): 正常/加急, AB(27): 跟進詳情, AC(28): 客戶反饋, AD(29): 封陽台數, AE(30): 安裝門數, AF(31): 安裝窗數, AG(32): 安裝鋁料數, AH(33): 拆舊數
+// AI(34): Report Code
+
 export async function fetchUserReports(username: string): Promise<Report[]> {
   try {
     const response = await fetch(`${FUNCTION_URL}?username=${encodeURIComponent(username)}`, {
@@ -45,7 +51,7 @@ export async function fetchUserReports(username: string): Promise<Report[]> {
     // Data comes as array of arrays (rows), transform to Report objects
     return rows.map((row: any[], index: number) => {
       const report: Report = {
-        id: row[33] || `temp-${index}`, // AH - report code
+        id: row[34] || `temp-${index}`, // AI - report code
         username: row[0] || '',
         date: row[1] || '',
         team: row[2] || '',
@@ -53,32 +59,36 @@ export async function fetchUserReports(username: string): Promise<Report[]> {
         installer2: row[4] || '',
         installer3: row[5] || '',
         installer4: row[6] || '',
+        // Completed case fields (H-S, indices 7-18)
         address: row[7] || '',
         actualDuration: row[8] || '',
-        difficulties: row[9] || '',
-        measuringColleague: row[10] || '',
-        customerFeedback: row[11] || '',
-        customerWitness: row[12] || '',
-        doorsInstalled: row[13] || '',
-        windowsInstalled: row[14] || '',
-        aluminumInstalled: row[15] || '',
-        oldGrillesRemoved: row[16] || '',
-        followUpAddress: row[17] || '',
-        followUpDuration: row[18] || '',
-        materialsCut: row[19] || '',
-        materialsSupplemented: row[20] || '',
-        reorders: row[21] || '',
-        followUpMeasuringColleague: row[22] || '',
-        reorderLocation: row[23] || '',
-        responsibility: row[24] || '',
-        urgency: row[25] || '',
-        followUpDetails: row[26] || '',
-        followUpCustomerFeedback: row[27] || '',
-        followUpDoorsInstalled: row[28] || '',
-        followUpWindowsInstalled: row[29] || '',
-        followUpAluminumInstalled: row[30] || '',
-        followUpOldGrillesRemoved: row[31] || '',
-        reportCode: row[33] || '', // AH column
+        estimatedDuration: row[9] || '',
+        difficulties: row[10] || '',
+        measuringColleague: row[11] || '',
+        customerFeedback: row[12] || '',
+        customerWitness: row[13] || '',
+        balconySealed: row[14] || '',
+        doorsInstalled: row[15] || '',
+        windowsInstalled: row[16] || '',
+        aluminumInstalled: row[17] || '',
+        oldRemoved: row[18] || '',
+        // Follow-up case fields (T-AH, indices 19-33)
+        followUpAddress: row[19] || '',
+        followUpDuration: row[20] || '',
+        followUpEstimatedDuration: row[21] || '',
+        reorders: row[22] || '',
+        followUpMeasuringColleague: row[23] || '',
+        reorderLocation: row[24] || '',
+        responsibility: row[25] || '',
+        urgency: row[26] || '',
+        followUpDetails: row[27] || '',
+        followUpCustomerFeedback: row[28] || '',
+        followUpBalconySealed: row[29] || '',
+        followUpDoorsInstalled: row[30] || '',
+        followUpWindowsInstalled: row[31] || '',
+        followUpAluminumInstalled: row[32] || '',
+        followUpOldRemoved: row[33] || '',
+        reportCode: row[34] || '', // AI column
         createdAt: row[1] || new Date().toISOString(),
         updatedAt: row[1] || new Date().toISOString(),
       };
@@ -105,65 +115,66 @@ export async function submitReport(username: string, formData: ReportFormData): 
     // Build rows - each completed case and follow-up case becomes a separate row
     const rows: any[][] = [];
 
-    // Add completed cases
+    // Add completed cases (35 columns: A-AI)
     formData.completedCases.forEach((caseData) => {
       // Only add if there's at least some data
       if (caseData.address || caseData.doorsInstalled || caseData.windowsInstalled) {
         const row = [
-          username, // A - username (server will enforce authenticated username)
-          basicInfo.date, // B - date
-          basicInfo.team, // C - team
-          basicInfo.installer1, // D - installer1
-          basicInfo.installer2, // E - installer2
-          basicInfo.installer3, // F - installer3
-          basicInfo.installer4, // G - installer4
-          caseData.address, // H - address
-          caseData.actualDuration, // I - duration
-          caseData.difficulties, // J - difficulties
-          caseData.measuringColleague, // K - measuring colleague
-          caseData.customerFeedback, // L - customer feedback
-          caseData.customerWitness, // M - customer witness
-          caseData.doorsInstalled, // N - doors
-          caseData.windowsInstalled, // O - windows
-          caseData.aluminumInstalled, // P - aluminum
-          caseData.oldGrillesRemoved, // Q - old grilles
-          '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', // R-AG empty for completed case
-          reportCode, // AH - report code
+          username,                   // A(0) - username
+          basicInfo.date,             // B(1) - date
+          basicInfo.team,             // C(2) - team
+          basicInfo.installer1,       // D(3) - installer1
+          basicInfo.installer2,       // E(4) - installer2
+          basicInfo.installer3,       // F(5) - installer3
+          basicInfo.installer4,       // G(6) - installer4
+          caseData.address,           // H(7) - address
+          caseData.actualDuration,    // I(8) - actual duration
+          caseData.estimatedDuration, // J(9) - estimated duration
+          caseData.difficulties,      // K(10) - difficulties
+          caseData.measuringColleague,// L(11) - measuring colleague
+          caseData.customerFeedback,  // M(12) - customer feedback
+          caseData.customerWitness,   // N(13) - customer witness
+          caseData.balconySealed,     // O(14) - balcony sealed
+          caseData.doorsInstalled,    // P(15) - doors
+          caseData.windowsInstalled,  // Q(16) - windows
+          caseData.aluminumInstalled, // R(17) - aluminum
+          caseData.oldRemoved,        // S(18) - old removed
+          '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', // T-AH(19-33) empty for completed case
+          reportCode,                 // AI(34) - report code
         ];
         rows.push(row);
       }
     });
 
-    // Add follow-up cases
+    // Add follow-up cases (35 columns: A-AI)
     formData.followUpCases.forEach((caseData) => {
       // Only add if there's at least some data
       if (caseData.address || caseData.doorsInstalled || caseData.windowsInstalled) {
         const row = [
-          username, // A - username (server will enforce authenticated username)
-          basicInfo.date, // B - date
-          basicInfo.team, // C - team
-          basicInfo.installer1, // D - installer1
-          basicInfo.installer2, // E - installer2
-          basicInfo.installer3, // F - installer3
-          basicInfo.installer4, // G - installer4
-          '', '', '', '', '', '', '', '', '', '', // H-Q empty for follow-up case
-          caseData.address, // R - address
-          caseData.duration, // S - duration
-          caseData.materialsCut, // T - materials cut
-          caseData.materialsSupplemented, // U - materials supplemented
-          caseData.reorders, // V - reorders
-          caseData.measuringColleague, // W - measuring colleague
-          caseData.reorderLocation, // X - reorder location
-          caseData.responsibility, // Y - responsibility
-          caseData.urgency, // Z - urgency
-          caseData.details, // AA - details
-          caseData.customerFeedback, // AB - customer feedback
-          caseData.doorsInstalled, // AC - doors
-          caseData.windowsInstalled, // AD - windows
-          caseData.aluminumInstalled, // AE - aluminum
-          caseData.oldGrillesRemoved, // AF - old grilles
-          '', // AG - empty
-          reportCode, // AH - report code
+          username,                   // A(0) - username
+          basicInfo.date,             // B(1) - date
+          basicInfo.team,             // C(2) - team
+          basicInfo.installer1,       // D(3) - installer1
+          basicInfo.installer2,       // E(4) - installer2
+          basicInfo.installer3,       // F(5) - installer3
+          basicInfo.installer4,       // G(6) - installer4
+          '', '', '', '', '', '', '', '', '', '', '', '', // H-S(7-18) empty for follow-up case
+          caseData.address,           // T(19) - address
+          caseData.duration,          // U(20) - actual duration
+          caseData.estimatedDuration, // V(21) - estimated duration
+          caseData.reorders,          // W(22) - reorders
+          caseData.measuringColleague,// X(23) - measuring colleague
+          caseData.reorderLocation,   // Y(24) - reorder location
+          caseData.responsibility,    // Z(25) - responsibility
+          caseData.urgency,           // AA(26) - urgency
+          caseData.details,           // AB(27) - details
+          caseData.customerFeedback,  // AC(28) - customer feedback
+          caseData.balconySealed,     // AD(29) - balcony sealed
+          caseData.doorsInstalled,    // AE(30) - doors
+          caseData.windowsInstalled,  // AF(31) - windows
+          caseData.aluminumInstalled, // AG(32) - aluminum
+          caseData.oldRemoved,        // AH(33) - old removed
+          reportCode,                 // AI(34) - report code
         ];
         rows.push(row);
       }
@@ -179,9 +190,9 @@ export async function submitReport(username: string, formData: ReportFormData): 
         basicInfo.installer2,
         basicInfo.installer3,
         basicInfo.installer4,
-        '', '', '', '', '', '', '', '', '', '', // H-Q
-        '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', // R-AG
-        reportCode, // AH
+        '', '', '', '', '', '', '', '', '', '', '', '', // H-S
+        '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', // T-AH
+        reportCode, // AI
       ];
       rows.push(row);
     }
@@ -224,7 +235,7 @@ export async function updateReport(username: string, formData: ReportFormData): 
     const basicInfo = formData.basicInfo;
     const rows: any[][] = [];
 
-    // Build completed case rows
+    // Build completed case rows (35 columns)
     formData.completedCases.forEach((caseData) => {
       if (caseData.address || caseData.doorsInstalled || caseData.windowsInstalled) {
         const row = [
@@ -237,22 +248,24 @@ export async function updateReport(username: string, formData: ReportFormData): 
           basicInfo.installer4,
           caseData.address,
           caseData.actualDuration,
+          caseData.estimatedDuration,
           caseData.difficulties,
           caseData.measuringColleague,
           caseData.customerFeedback,
           caseData.customerWitness,
+          caseData.balconySealed,
           caseData.doorsInstalled,
           caseData.windowsInstalled,
           caseData.aluminumInstalled,
-          caseData.oldGrillesRemoved,
-          '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+          caseData.oldRemoved,
+          '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
           reportCode,
         ];
         rows.push(row);
       }
     });
 
-    // Build follow-up case rows
+    // Build follow-up case rows (35 columns)
     formData.followUpCases.forEach((caseData) => {
       if (caseData.address || caseData.doorsInstalled || caseData.windowsInstalled) {
         const row = [
@@ -263,11 +276,10 @@ export async function updateReport(username: string, formData: ReportFormData): 
           basicInfo.installer2,
           basicInfo.installer3,
           basicInfo.installer4,
-          '', '', '', '', '', '', '', '', '', '',
+          '', '', '', '', '', '', '', '', '', '', '', '',
           caseData.address,
           caseData.duration,
-          caseData.materialsCut,
-          caseData.materialsSupplemented,
+          caseData.estimatedDuration,
           caseData.reorders,
           caseData.measuringColleague,
           caseData.reorderLocation,
@@ -275,11 +287,11 @@ export async function updateReport(username: string, formData: ReportFormData): 
           caseData.urgency,
           caseData.details,
           caseData.customerFeedback,
+          caseData.balconySealed,
           caseData.doorsInstalled,
           caseData.windowsInstalled,
           caseData.aluminumInstalled,
-          caseData.oldGrillesRemoved,
-          '',
+          caseData.oldRemoved,
           reportCode,
         ];
         rows.push(row);
@@ -295,8 +307,8 @@ export async function updateReport(username: string, formData: ReportFormData): 
         basicInfo.installer2,
         basicInfo.installer3,
         basicInfo.installer4,
-        '', '', '', '', '', '', '', '', '', '',
-        '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+        '', '', '', '', '', '', '', '', '', '', '', '',
+        '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
         reportCode,
       ];
       rows.push(row);
