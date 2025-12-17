@@ -84,22 +84,23 @@ const reportsToFormData = (reports: Report[]): ReportFormData => {
       completedCases.push({
         address: r.address || '',
         actualDuration: r.actualDuration || '',
+        estimatedDuration: r.estimatedDuration || '',
         difficulties: r.difficulties || '',
         measuringColleague: r.measuringColleague || '',
         customerFeedback: r.customerFeedback || '',
         customerWitness: r.customerWitness || '',
+        balconySealed: String(r.balconySealed || ''),
         doorsInstalled: String(r.doorsInstalled || ''),
         windowsInstalled: String(r.windowsInstalled || ''),
         aluminumInstalled: String(r.aluminumInstalled || ''),
-        oldGrillesRemoved: String(r.oldGrillesRemoved || ''),
+        oldRemoved: String(r.oldRemoved || ''),
       });
     }
     if (r.followUpAddress || r.followUpDoorsInstalled || r.followUpWindowsInstalled) {
       followUpCases.push({
         address: r.followUpAddress || '',
         duration: r.followUpDuration || '',
-        materialsCut: String(r.materialsCut || ''),
-        materialsSupplemented: String(r.materialsSupplemented || ''),
+        estimatedDuration: r.followUpEstimatedDuration || '',
         reorders: String(r.reorders || ''),
         measuringColleague: r.followUpMeasuringColleague || '',
         reorderLocation: r.reorderLocation || '',
@@ -107,10 +108,11 @@ const reportsToFormData = (reports: Report[]): ReportFormData => {
         urgency: r.urgency || '',
         details: r.followUpDetails || '',
         customerFeedback: r.followUpCustomerFeedback || '',
+        balconySealed: String(r.followUpBalconySealed || ''),
         doorsInstalled: String(r.followUpDoorsInstalled || ''),
         windowsInstalled: String(r.followUpWindowsInstalled || ''),
         aluminumInstalled: String(r.followUpAluminumInstalled || ''),
-        oldGrillesRemoved: String(r.followUpOldGrillesRemoved || ''),
+        oldRemoved: String(r.followUpOldRemoved || ''),
       });
     }
   });
@@ -458,9 +460,22 @@ const ReportForm = () => {
                     </div>
                   </div>
                   <div className="space-y-2">
+                    <Label>度尺同事预计时长</Label>
+                    <div className="relative">
+                      <Clock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        placeholder="例如：2小时"
+                        value={caseData.estimatedDuration}
+                        onChange={(e) => handleCompletedCaseChange(index, 'estimatedDuration', e.target.value)}
+                        className="pl-10 bg-background/50"
+                        disabled={isViewMode}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
                     <Label>度尺同事</Label>
                     <Select
-                      value={caseData.measuringColleague}
+                      value={caseData.measuringColleague || '_empty'}
                       onValueChange={(value) => handleCompletedCaseChange(index, 'measuringColleague', value === '_empty' ? '' : value)}
                       disabled={isViewMode}
                     >
@@ -520,7 +535,21 @@ const ReportForm = () => {
                   </div>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                  <div className="space-y-2">
+                    <Label>封阳台数</Label>
+                    <Input
+                      inputMode="numeric"
+                      placeholder="输入数量"
+                      value={caseData.balconySealed}
+                      onChange={(e) => {
+                        const val = handleNumericInput(e.target.value);
+                        if (val !== '' || e.target.value === '') handleCompletedCaseChange(index, 'balconySealed', e.target.value === '' ? '' : val);
+                      }}
+                      disabled={isViewMode}
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-background/50"
+                    />
+                  </div>
                   <div className="space-y-2">
                     <Label>安装门数</Label>
                     <Input
@@ -564,14 +593,14 @@ const ReportForm = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>拆旧拆拉钉窗花数</Label>
+                    <Label>拆旧数</Label>
                     <Input
                       inputMode="numeric"
                       placeholder="输入数量"
-                      value={caseData.oldGrillesRemoved}
+                      value={caseData.oldRemoved}
                       onChange={(e) => {
                         const val = handleNumericInput(e.target.value);
-                        if (val !== '' || e.target.value === '') handleCompletedCaseChange(index, 'oldGrillesRemoved', e.target.value === '' ? '' : val);
+                        if (val !== '' || e.target.value === '') handleCompletedCaseChange(index, 'oldRemoved', e.target.value === '' ? '' : val);
                       }}
                       disabled={isViewMode}
                       className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-background/50"
@@ -651,9 +680,22 @@ const ReportForm = () => {
                     </div>
                   </div>
                   <div className="space-y-2">
+                    <Label>度尺同事预计时长</Label>
+                    <div className="relative">
+                      <Clock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        placeholder="例如：2小时"
+                        value={caseData.estimatedDuration}
+                        onChange={(e) => handleFollowUpCaseChange(index, 'estimatedDuration', e.target.value)}
+                        className="pl-10 bg-background/50"
+                        disabled={isViewMode}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
                     <Label>度尺同事</Label>
                     <Select
-                      value={caseData.measuringColleague}
+                      value={caseData.measuringColleague || '_empty'}
                       onValueChange={(value) => handleFollowUpCaseChange(index, 'measuringColleague', value === '_empty' ? '' : value)}
                       disabled={isViewMode}
                     >
@@ -670,35 +712,7 @@ const ReportForm = () => {
                   </div>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-4">
-                  <div className="space-y-2">
-                    <Label>开料数</Label>
-                    <Input
-                      inputMode="numeric"
-                      placeholder="输入数量"
-                      value={caseData.materialsCut}
-                      onChange={(e) => {
-                        const val = handleNumericInput(e.target.value);
-                        if (val !== '' || e.target.value === '') handleFollowUpCaseChange(index, 'materialsCut', e.target.value === '' ? '' : val);
-                      }}
-                      disabled={isViewMode}
-                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-background/50"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>补料数</Label>
-                    <Input
-                      inputMode="numeric"
-                      placeholder="输入数量"
-                      value={caseData.materialsSupplemented}
-                      onChange={(e) => {
-                        const val = handleNumericInput(e.target.value);
-                        if (val !== '' || e.target.value === '') handleFollowUpCaseChange(index, 'materialsSupplemented', e.target.value === '' ? '' : val);
-                      }}
-                      disabled={isViewMode}
-                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-background/50"
-                    />
-                  </div>
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label>重订数</Label>
                     <Input
@@ -729,7 +743,7 @@ const ReportForm = () => {
                   <div className="space-y-2">
                     <Label>责任选项</Label>
                     <Select
-                      value={caseData.responsibility}
+                      value={caseData.responsibility || '_empty'}
                       onValueChange={(value) => handleFollowUpCaseChange(index, 'responsibility', value === '_empty' ? '' : value)}
                       disabled={isViewMode}
                     >
@@ -789,7 +803,21 @@ const ReportForm = () => {
                   />
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                  <div className="space-y-2">
+                    <Label>封阳台数</Label>
+                    <Input
+                      inputMode="numeric"
+                      placeholder="输入数量"
+                      value={caseData.balconySealed}
+                      onChange={(e) => {
+                        const val = handleNumericInput(e.target.value);
+                        if (val !== '' || e.target.value === '') handleFollowUpCaseChange(index, 'balconySealed', e.target.value === '' ? '' : val);
+                      }}
+                      disabled={isViewMode}
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-background/50"
+                    />
+                  </div>
                   <div className="space-y-2">
                     <Label>安装门数</Label>
                     <Input
@@ -833,14 +861,14 @@ const ReportForm = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>拆旧拆拉钉窗花数</Label>
+                    <Label>拆旧数</Label>
                     <Input
                       inputMode="numeric"
                       placeholder="输入数量"
-                      value={caseData.oldGrillesRemoved}
+                      value={caseData.oldRemoved}
                       onChange={(e) => {
                         const val = handleNumericInput(e.target.value);
-                        if (val !== '' || e.target.value === '') handleFollowUpCaseChange(index, 'oldGrillesRemoved', e.target.value === '' ? '' : val);
+                        if (val !== '' || e.target.value === '') handleFollowUpCaseChange(index, 'oldRemoved', e.target.value === '' ? '' : val);
                       }}
                       disabled={isViewMode}
                       className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-background/50"
