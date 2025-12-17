@@ -12,20 +12,20 @@ import { supabase } from '@/integrations/supabase/client';
 // Input validation
 const validateUsername = (username: string): string | null => {
   const trimmed = username.trim();
-  if (!trimmed) return '請輸入使用者名稱';
-  if (trimmed.length < 2) return '使用者名稱至少需要2個字元';
-  if (trimmed.length > 50) return '使用者名稱不能超過50個字元';
+  if (!trimmed) return '请输入用户名';
+  if (trimmed.length < 2) return '用户名至少需要2个字符';
+  if (trimmed.length > 50) return '用户名不能超过50个字符';
   // Allow alphanumeric, Chinese characters, underscores, hyphens
   if (!/^[\w\u4e00-\u9fa5-]+$/u.test(trimmed)) {
-    return '使用者名稱只能包含字母、數字、中文、底線和連字符';
+    return '用户名只能包含字母、数字、中文、下划线和连字符';
   }
   return null;
 };
 
 const validatePassword = (password: string): string | null => {
-  if (!password) return '請輸入密碼';
-  if (password.length < 6) return '密碼至少需要6個字元';
-  if (password.length > 72) return '密碼不能超過72個字元';
+  if (!password) return '请输入密码';
+  if (password.length < 6) return '密码至少需要6个字符';
+  if (password.length > 72) return '密码不能超过72个字符';
   return null;
 };
 
@@ -66,13 +66,13 @@ const Login = () => {
         });
       
       if (loginError) {
-        toast.error('登入失敗，請重試');
+        toast.error('登录失败，请重试');
         setIsLoading(false);
         return;
       }
 
       if (!userData || userData.length === 0) {
-        toast.error('用戶名稱或密碼錯誤');
+        toast.error('用户名或密码错误');
         setIsLoading(false);
         return;
       }
@@ -84,16 +84,15 @@ const Login = () => {
         .rpc('create_user_session', { input_user_id: user.user_id });
 
       if (sessionError || !sessionToken) {
-        toast.error('登入失敗，請重試');
+        toast.error('登录失败，请重试');
         setIsLoading(false);
         return;
       }
 
       login(user.user_id, user.username, sessionToken);
-      toast.success(`歡迎，${user.username}！`);
-      // 路由跳轉交由 Index.tsx 的 isAuthenticated 監聽處理，避免狀態更新競態
+      toast.success(`欢迎，${user.username}！`);
     } catch (error) {
-      toast.error('登入失敗，請重試');
+      toast.error('登录失败，请重试');
     } finally {
       setIsLoading(false);
     }
@@ -117,7 +116,7 @@ const Login = () => {
     }
 
     if (registerPassword !== confirmPassword) {
-      toast.error('兩次輸入的密碼不一致');
+      toast.error('两次输入的密码不一致');
       return;
     }
 
@@ -129,13 +128,13 @@ const Login = () => {
         .rpc('check_username_exists', { check_username: registerUsername.trim() });
       
       if (checkError) {
-        toast.error('註冊失敗，請重試');
+        toast.error('注册失败，请重试');
         setIsRegistering(false);
         return;
       }
 
       if (exists) {
-        toast.error('此用戶名稱已被使用，請選擇其他名稱');
+        toast.error('此用户名已被使用，请选择其他名称');
         setIsRegistering(false);
         return;
       }
@@ -145,7 +144,7 @@ const Login = () => {
         .rpc('hash_password', { password: registerPassword });
 
       if (hashError || !hashedPassword) {
-        toast.error('註冊失敗，請重試');
+        toast.error('注册失败，请重试');
         setIsRegistering(false);
         return;
       }
@@ -160,65 +159,71 @@ const Login = () => {
       
       if (error) {
         if (error.code === '23505') {
-          toast.error('此用戶名稱已被使用，請選擇其他名稱');
+          toast.error('此用户名已被使用，请选择其他名称');
         } else {
-          toast.error('註冊失敗，請重試');
+          toast.error('注册失败，请重试');
         }
         setIsRegistering(false);
         return;
       }
       
-      toast.success('註冊成功！請登入');
+      toast.success('注册成功！请登录');
       setUsername(registerUsername.trim());
       setRegisterUsername('');
       setRegisterPassword('');
       setConfirmPassword('');
     } catch (error) {
-      toast.error('註冊失敗，請重試');
+      toast.error('注册失败，请重试');
     } finally {
       setIsRegistering(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md animate-slide-up">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4 relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-1/2 -right-1/2 w-full h-full bg-gradient-to-bl from-primary/5 via-transparent to-transparent rounded-full blur-3xl" />
+        <div className="absolute -bottom-1/2 -left-1/2 w-full h-full bg-gradient-to-tr from-accent/5 via-transparent to-transparent rounded-full blur-3xl" />
+      </div>
+
+      <div className="w-full max-w-md animate-slide-up relative z-10">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl gradient-primary shadow-soft mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl gradient-primary shadow-glow mb-4 animate-glow-pulse">
             <ClipboardList className="w-8 h-8 text-primary-foreground" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">安裝報告系統</h1>
-          <p className="text-muted-foreground mt-2">提交及管理您的安裝報告</p>
+          <h1 className="text-2xl font-bold text-foreground">安装报告系统</h1>
+          <p className="text-muted-foreground mt-2">提交及管理您的安装报告</p>
         </div>
 
-        <Card className="shadow-card border-border/50">
+        <Card className="shadow-card border-border/50 glass-effect">
           <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">登入</TabsTrigger>
-              <TabsTrigger value="register">註冊</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 bg-muted/50">
+              <TabsTrigger value="login" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">登录</TabsTrigger>
+              <TabsTrigger value="register" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">注册</TabsTrigger>
             </TabsList>
             
             <TabsContent value="login">
               <CardHeader className="space-y-1 pb-4">
                 <CardTitle className="text-xl flex items-center gap-2">
-                  <User className="w-5 h-5" />
-                  登入
+                  <User className="w-5 h-5 text-primary" />
+                  登录
                 </CardTitle>
-                <CardDescription>輸入已註冊的使用者名稱和密碼</CardDescription>
+                <CardDescription>输入已注册的用户名和密码</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="username">使用者名稱</Label>
+                    <Label htmlFor="username">用户名</Label>
                     <div className="relative">
                       <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input
                         id="username"
                         type="text"
-                        placeholder="請輸入使用者名稱"
+                        placeholder="请输入用户名"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        className="pl-10"
+                        className="pl-10 bg-background/50"
                         autoComplete="username"
                         autoFocus
                         maxLength={50}
@@ -226,16 +231,16 @@ const Login = () => {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="password">密碼</Label>
+                    <Label htmlFor="password">密码</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input
                         id="password"
                         type="password"
-                        placeholder="請輸入密碼"
+                        placeholder="请输入密码"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="pl-10"
+                        className="pl-10 bg-background/50"
                         autoComplete="current-password"
                         maxLength={72}
                       />
@@ -243,10 +248,15 @@ const Login = () => {
                   </div>
                   <Button 
                     type="submit" 
-                    className="w-full gradient-primary text-primary-foreground hover:opacity-90 transition-opacity"
+                    className="w-full gradient-primary text-primary-foreground shadow-soft hover-lift"
                     disabled={isLoading}
                   >
-                    {isLoading ? '登入中...' : '登入'}
+                    {isLoading ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin mr-2" />
+                        登录中...
+                      </>
+                    ) : '登录'}
                   </Button>
                 </form>
               </CardContent>
@@ -255,62 +265,62 @@ const Login = () => {
             <TabsContent value="register">
               <CardHeader className="space-y-1 pb-4">
                 <CardTitle className="text-xl flex items-center gap-2">
-                  <UserPlus className="w-5 h-5" />
-                  註冊
+                  <UserPlus className="w-5 h-5 text-primary" />
+                  注册
                 </CardTitle>
-                <CardDescription>建立新的使用者帳號</CardDescription>
+                <CardDescription>创建新的用户账号</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleRegister} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="registerUsername">使用者名稱</Label>
+                    <Label htmlFor="registerUsername">用户名</Label>
                     <div className="relative">
                       <UserPlus className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input
                         id="registerUsername"
                         type="text"
-                        placeholder="請輸入使用者名稱"
+                        placeholder="请输入用户名"
                         value={registerUsername}
                         onChange={(e) => setRegisterUsername(e.target.value)}
-                        className="pl-10"
+                        className="pl-10 bg-background/50"
                         autoComplete="off"
                         maxLength={50}
                       />
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      使用者名稱至少需要2個字元
+                      用户名至少需要2个字符
                     </p>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="registerPassword">密碼</Label>
+                    <Label htmlFor="registerPassword">密码</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input
                         id="registerPassword"
                         type="password"
-                        placeholder="請輸入密碼"
+                        placeholder="请输入密码"
                         value={registerPassword}
                         onChange={(e) => setRegisterPassword(e.target.value)}
-                        className="pl-10"
+                        className="pl-10 bg-background/50"
                         autoComplete="new-password"
                         maxLength={72}
                       />
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      密碼至少需要6個字元
+                      密码至少需要6个字符
                     </p>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">確認密碼</Label>
+                    <Label htmlFor="confirmPassword">确认密码</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input
                         id="confirmPassword"
                         type="password"
-                        placeholder="請再次輸入密碼"
+                        placeholder="请再次输入密码"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="pl-10"
+                        className="pl-10 bg-background/50"
                         autoComplete="new-password"
                         maxLength={72}
                       />
@@ -318,10 +328,15 @@ const Login = () => {
                   </div>
                   <Button 
                     type="submit" 
-                    className="w-full gradient-primary text-primary-foreground hover:opacity-90 transition-opacity"
+                    className="w-full gradient-primary text-primary-foreground shadow-soft hover-lift"
                     disabled={isRegistering}
                   >
-                    {isRegistering ? '註冊中...' : '註冊'}
+                    {isRegistering ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin mr-2" />
+                        注册中...
+                      </>
+                    ) : '注册'}
                   </Button>
                 </form>
               </CardContent>
@@ -330,7 +345,7 @@ const Login = () => {
         </Card>
 
         <p className="text-center text-sm text-muted-foreground mt-6">
-          註冊後即可登入並提交安裝報告
+          注册后即可登录并提交安装报告
         </p>
       </div>
     </div>

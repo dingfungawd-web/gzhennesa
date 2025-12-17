@@ -48,7 +48,7 @@ const Dashboard = () => {
       setReports(userReports);
     } catch (error) {
       console.error('Failed to load reports:', error);
-      toast.error('載入報告失敗');
+      toast.error('加载报告失败');
     } finally {
       setIsLoading(false);
     }
@@ -118,12 +118,11 @@ const Dashboard = () => {
       });
     });
 
-    // Sort by date descending
+    // Sort by date descending (newest first), then by reportCode descending
     return result.sort((a, b) => {
-      if (a.date && b.date) {
-        return b.date.localeCompare(a.date);
-      }
-      return 0;
+      const dateCompare = (b.date || '').localeCompare(a.date || '');
+      if (dateCompare !== 0) return dateCompare;
+      return (b.reportCode || '').localeCompare(a.reportCode || '');
     });
   }, [reports]);
 
@@ -152,19 +151,19 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b border-border">
+      <header className="sticky top-0 z-50 glass-effect border-b border-border/50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-soft">
+              <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-glow">
                 <ClipboardList className="w-5 h-5 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="font-semibold text-foreground">安裝報告系統</h1>
-                <p className="text-sm text-muted-foreground">歡迎，{username}</p>
+                <h1 className="font-semibold text-foreground">安装报告系统</h1>
+                <p className="text-sm text-muted-foreground">欢迎，{username}</p>
               </div>
             </div>
-            <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-2">
+            <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-2 hover:bg-destructive/10 hover:text-destructive">
               <LogOut className="w-4 h-4" />
               登出
             </Button>
@@ -176,58 +175,61 @@ const Dashboard = () => {
       <main className="container mx-auto px-4 py-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
-            <h2 className="text-2xl font-bold text-foreground">我的報告</h2>
-            <p className="text-muted-foreground">查看及管理您提交的安裝報告（從Google Sheet同步）</p>
+            <h2 className="text-2xl font-bold text-foreground">我的报告</h2>
+            <p className="text-muted-foreground">查看及管理您提交的安装报告</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={handleRefresh} className="gap-2">
+            <Button variant="outline" onClick={handleRefresh} className="gap-2 hover-lift">
               <RefreshCw className="w-4 h-4" />
               刷新
             </Button>
-            <Button onClick={handleNewReport} className="gradient-primary text-primary-foreground gap-2">
+            <Button onClick={handleNewReport} className="gradient-primary text-primary-foreground gap-2 shadow-soft hover-lift">
               <Plus className="w-4 h-4" />
-              新增報告
+              新增报告
             </Button>
           </div>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <Card className="shadow-card border-border/50">
-            <CardContent className="pt-6">
+          <Card className="shadow-card hover-lift border-border/50 overflow-hidden">
+            <div className="absolute inset-0 gradient-glow opacity-50" />
+            <CardContent className="pt-6 relative">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center tech-border">
                   <ClipboardList className="w-6 h-6 text-primary" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-foreground">{groupedReports.length}</p>
-                  <p className="text-sm text-muted-foreground">總報告數</p>
+                  <p className="text-sm text-muted-foreground">总报告数</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          <Card className="shadow-card border-border/50">
-            <CardContent className="pt-6">
+          <Card className="shadow-card hover-lift border-border/50 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-success/5 to-success/10 opacity-50" />
+            <CardContent className="pt-6 relative">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center">
-                  <CheckCircle className="w-6 h-6 text-green-500" />
+                <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
+                  <CheckCircle className="w-6 h-6 text-success" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-foreground">{totalCompleted}</p>
-                  <p className="text-sm text-muted-foreground">已完成個案</p>
+                  <p className="text-sm text-muted-foreground">已完成个案</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          <Card className="shadow-card border-border/50">
-            <CardContent className="pt-6">
+          <Card className="shadow-card hover-lift border-border/50 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-warning/5 to-warning/10 opacity-50" />
+            <CardContent className="pt-6 relative">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center">
                   <AlertCircle className="w-6 h-6 text-warning" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-foreground">{totalFollowUp}</p>
-                  <p className="text-sm text-muted-foreground">需跟進個案</p>
+                  <p className="text-sm text-muted-foreground">需跟进个案</p>
                 </div>
               </div>
             </CardContent>
@@ -237,41 +239,44 @@ const Dashboard = () => {
         {/* Reports Table */}
         <Card className="shadow-card border-border/50">
           <CardHeader>
-            <CardTitle>報告列表</CardTitle>
-            <CardDescription>點擊報告可查看及修改詳情</CardDescription>
+            <CardTitle>报告列表</CardTitle>
+            <CardDescription>点击报告可查看及修改详情</CardDescription>
           </CardHeader>
           <CardContent>
             {isLoading ? (
               <div className="text-center py-12 text-muted-foreground">
-                載入中...
+                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                加载中...
               </div>
             ) : groupedReports.length === 0 ? (
               <div className="text-center py-12">
-                <ClipboardList className="w-12 h-12 text-muted-foreground/50 mx-auto mb-4" />
-                <p className="text-muted-foreground mb-4">尚無報告記錄</p>
-                <Button onClick={handleNewReport} variant="outline" className="gap-2">
+                <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                  <ClipboardList className="w-8 h-8 text-muted-foreground/50" />
+                </div>
+                <p className="text-muted-foreground mb-4">尚无报告记录</p>
+                <Button onClick={handleNewReport} variant="outline" className="gap-2 hover-lift">
                   <Plus className="w-4 h-4" />
-                  提交第一份報告
+                  提交第一份报告
                 </Button>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow>
+                    <TableRow className="hover:bg-transparent">
                       <TableHead>日期</TableHead>
-                      <TableHead>分隊</TableHead>
-                      <TableHead>安裝同事</TableHead>
+                      <TableHead>分队</TableHead>
+                      <TableHead>安装同事</TableHead>
                       <TableHead className="text-center">已完成</TableHead>
-                      <TableHead className="text-center">需跟進</TableHead>
-                      <TableHead>報告編號</TableHead>
+                      <TableHead className="text-center">需跟进</TableHead>
+                      <TableHead>报告编号</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {groupedReports.map((report) => (
                       <TableRow 
                         key={report.reportCode} 
-                        className="group cursor-pointer hover:bg-muted/50"
+                        className="group cursor-pointer hover:bg-primary/5 transition-colors"
                         onClick={() => navigate(`/report/${encodeURIComponent(report.reportCode)}`)}
                       >
                         <TableCell className="font-medium">
@@ -281,7 +286,7 @@ const Dashboard = () => {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="secondary">{report.team}</Badge>
+                          <Badge variant="secondary" className="font-normal">{report.team}</Badge>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
@@ -295,7 +300,7 @@ const Dashboard = () => {
                         </TableCell>
                         <TableCell className="text-center">
                           {report.completedCount > 0 ? (
-                            <Badge variant="default" className="bg-green-500/10 text-green-600 hover:bg-green-500/20">
+                            <Badge variant="default" className="bg-success/10 text-success hover:bg-success/20 border-0">
                               <CheckCircle className="w-3 h-3 mr-1" />
                               {report.completedCount}
                             </Badge>
@@ -305,7 +310,7 @@ const Dashboard = () => {
                         </TableCell>
                         <TableCell className="text-center">
                           {report.followUpCount > 0 ? (
-                            <Badge variant="default" className="bg-warning/10 text-warning hover:bg-warning/20">
+                            <Badge variant="default" className="bg-warning/10 text-warning hover:bg-warning/20 border-0">
                               <AlertCircle className="w-3 h-3 mr-1" />
                               {report.followUpCount}
                             </Badge>
@@ -314,7 +319,7 @@ const Dashboard = () => {
                           )}
                         </TableCell>
                         <TableCell>
-                          <code className="text-xs bg-muted px-2 py-1 rounded">
+                          <code className="text-xs bg-muted/50 px-2 py-1 rounded-md font-mono">
                             {report.reportCode}
                           </code>
                         </TableCell>
