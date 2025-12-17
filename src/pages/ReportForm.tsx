@@ -26,8 +26,8 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-const INSTALLERS = ['陳浩嘉', '朱沛儒', '王勇', '陳辉鸿', '小卓'];
-const MEASURING_COLLEAGUES = ['黃仲柱', '彭晨陽', '李偉國'];
+const INSTALLERS = ['陈浩嘉', '朱沛儒', '王勇', '陈辉鸿', '小卓'];
+const MEASURING_COLLEAGUES = ['黄仲柱', '彭晨阳', '李伟国'];
 
 const toISODateForInput = (raw: string): string => {
   const value = String(raw || '').trim();
@@ -169,12 +169,12 @@ const ReportForm = () => {
         if (!cancelled && reports.length > 0) {
           setFormData(reportsToFormData(reports));
         } else if (!cancelled) {
-          toast.error('找不到該報告');
+          toast.error('找不到该报告');
           navigate('/my-reports');
         }
       } catch (error) {
         if (!cancelled) {
-          toast.error('載入報告失敗');
+          toast.error('加载报告失败');
           navigate('/my-reports');
         }
       } finally {
@@ -253,13 +253,13 @@ const ReportForm = () => {
     e.preventDefault();
 
     if (!username) {
-      toast.error('登入狀態已失效，請重新登入');
+      toast.error('登录状态已失效，请重新登录');
       navigate('/');
       return;
     }
     
     if (!formData.basicInfo.date || !formData.basicInfo.team) {
-      toast.error('請填寫必要欄位（日期、分隊）');
+      toast.error('请填写必要栏位（日期、分队）');
       return;
     }
 
@@ -268,21 +268,21 @@ const ReportForm = () => {
     try {
       if (isEditMode) {
         await updateReport(username, formData);
-        toast.success('報告已更新');
+        toast.success('报告已更新');
       } else {
         await submitReport(username, formData);
-        toast.success('報告已提交');
+        toast.success('报告已提交');
       }
       navigate('/my-reports');
     } catch (error) {
       console.error('Report submit/update failed:', error);
       const msg = error instanceof Error ? error.message : '';
       if (msg.includes('Session expired')) {
-        toast.error('登入狀態已失效，請重新登入');
+        toast.error('登录状态已失效，请重新登录');
         navigate('/');
         return;
       }
-      const fallback = isEditMode ? '更新失敗，請重試' : '儲存失敗，請重試';
+      const fallback = isEditMode ? '更新失败，请重试' : '保存失败，请重试';
       toast.error(msg ? `${fallback}（${msg}）` : fallback);
     } finally {
       setIsSaving(false);
@@ -292,30 +292,33 @@ const ReportForm = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-muted-foreground">載入中...</p>
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">加载中...</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b border-border">
+      <header className="sticky top-0 z-50 glass-effect border-b border-border/50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" onClick={() => navigate('/my-reports')}>
+              <Button variant="ghost" size="icon" onClick={() => navigate('/my-reports')} className="hover:bg-muted">
                 <ArrowLeft className="w-5 h-5" />
               </Button>
               <div>
                 <h1 className="font-semibold text-foreground">
-                  {isViewMode ? '查看報告' : isEditMode ? '修改報告' : '新增報告'}
+                  {isViewMode ? '查看报告' : isEditMode ? '修改报告' : '新增报告'}
                 </h1>
                 <p className="text-sm text-muted-foreground">{username}</p>
               </div>
             </div>
-            <Button variant="outline" onClick={() => navigate('/my-reports')}>
+            <Button variant="outline" onClick={() => navigate('/my-reports')} className="hover-lift">
               <FileText className="w-4 h-4 mr-2" />
-              我的報告
+              我的报告
             </Button>
           </div>
         </div>
@@ -328,9 +331,9 @@ const ReportForm = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-primary" />
-                基本資料
+                基本资料
               </CardTitle>
-              <CardDescription>填寫報告的基本資訊（所有個案共用）</CardDescription>
+              <CardDescription>填写报告的基本信息（所有个案共用）</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
@@ -342,17 +345,19 @@ const ReportForm = () => {
                   onChange={(e) => handleBasicInfoChange('date', e.target.value)}
                   disabled={isViewMode}
                   required
+                  className="bg-background/50"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="team">分隊 *</Label>
+                <Label htmlFor="team">分队 *</Label>
                 <Input
                   id="team"
-                  placeholder="輸入分隊名稱"
+                  placeholder="输入分队名称"
                   value={formData.basicInfo.team}
                   onChange={(e) => handleBasicInfoChange('team', e.target.value)}
                   disabled={isViewMode}
                   required
+                  className="bg-background/50"
                 />
               </div>
             </CardContent>
@@ -363,24 +368,24 @@ const ReportForm = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="w-5 h-5 text-primary" />
-                安裝同事
+                安装同事
               </CardTitle>
-              <CardDescription>選擇參與安裝的同事</CardDescription>
+              <CardDescription>选择参与安装的同事</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
               {[1, 2, 3, 4].map((num) => (
                 <div key={num} className="space-y-2">
-                  <Label>安裝同事 {num}</Label>
+                  <Label>安装同事 {num}</Label>
                   <Select
                     value={formData.basicInfo[`installer${num}` as keyof typeof formData.basicInfo]}
                     onValueChange={(value) => handleBasicInfoChange(`installer${num}` as keyof typeof formData.basicInfo, value === '_empty' ? '' : value)}
                     disabled={isViewMode}
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="選擇同事" />
+                    <SelectTrigger className="bg-background/50">
+                      <SelectValue placeholder="选择同事" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="_empty">不選擇</SelectItem>
+                      <SelectItem value="_empty">不选择</SelectItem>
                       {INSTALLERS.map((name) => (
                         <SelectItem key={name} value={name}>{name}</SelectItem>
                       ))}
@@ -391,16 +396,17 @@ const ReportForm = () => {
             </CardContent>
           </Card>
 
-          <Separator />
+          <Separator className="my-8" />
 
           {/* Completed Cases Section */}
           {formData.completedCases.map((caseData, index) => (
-            <Card key={`completed-${index}`} className="shadow-card border-border/50">
-              <CardHeader>
+            <Card key={`completed-${index}`} className="shadow-card border-border/50 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-success/5 to-transparent pointer-events-none" />
+              <CardHeader className="relative">
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5 text-green-500" />
-                    已完成個案 {formData.completedCases.length > 1 ? `#${index + 1}` : ''}
+                    <CheckCircle className="w-5 h-5 text-success" />
+                    已完成个案 {formData.completedCases.length > 1 ? `#${index + 1}` : ''}
                   </CardTitle>
                   {formData.completedCases.length > 1 && !isViewMode && (
                     <Button
@@ -408,38 +414,38 @@ const ReportForm = () => {
                       variant="ghost"
                       size="sm"
                       onClick={() => removeCompletedCase(index)}
-                      className="text-destructive hover:text-destructive"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   )}
                 </div>
-                <CardDescription>填寫已完成安裝的個案資料</CardDescription>
+                <CardDescription>填写已完成安装的个案资料</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 relative">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2 sm:col-span-2">
                     <Label>地址</Label>
                     <div className="relative">
                       <MapPin className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                       <Input
-                        placeholder="輸入安裝地址"
+                        placeholder="输入安装地址"
                         value={caseData.address}
                         onChange={(e) => handleCompletedCaseChange(index, 'address', e.target.value)}
-                        className="pl-10"
+                        className="pl-10 bg-background/50"
                         disabled={isViewMode}
                       />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label>安裝實際時長</Label>
+                    <Label>安装实际时长</Label>
                     <div className="relative">
                       <Clock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                       <Input
-                        placeholder="例如：3小時"
+                        placeholder="例如：3小时"
                         value={caseData.actualDuration}
                         onChange={(e) => handleCompletedCaseChange(index, 'actualDuration', e.target.value)}
-                        className="pl-10"
+                        className="pl-10 bg-background/50"
                         disabled={isViewMode}
                       />
                     </div>
@@ -451,11 +457,11 @@ const ReportForm = () => {
                       onValueChange={(value) => handleCompletedCaseChange(index, 'measuringColleague', value === '_empty' ? '' : value)}
                       disabled={isViewMode}
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder="選擇度尺同事" />
+                      <SelectTrigger className="bg-background/50">
+                        <SelectValue placeholder="选择度尺同事" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="_empty">不選擇</SelectItem>
+                        <SelectItem value="_empty">不选择</SelectItem>
                         {MEASURING_COLLEAGUES.map((name) => (
                           <SelectItem key={name} value={name}>{name}</SelectItem>
                         ))}
@@ -465,93 +471,96 @@ const ReportForm = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>現場困難解決和建議</Label>
+                  <Label>现场困难解决和建议</Label>
                   <Textarea
-                    placeholder="描述遇到的困難及解決方案..."
+                    placeholder="描述遇到的困难及解决方案..."
                     value={caseData.difficulties}
                     onChange={(e) => handleCompletedCaseChange(index, 'difficulties', e.target.value)}
                     rows={3}
                     disabled={isViewMode}
+                    className="bg-background/50"
                   />
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label>客戶反饋</Label>
+                    <Label>客户反馈</Label>
                     <Textarea
-                      placeholder="客戶的意見及反饋..."
+                      placeholder="客户的意见及反馈..."
                       value={caseData.customerFeedback}
                       onChange={(e) => handleCompletedCaseChange(index, 'customerFeedback', e.target.value)}
                       rows={2}
                       disabled={isViewMode}
+                      className="bg-background/50"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>客戶親證</Label>
+                    <Label>客户亲证</Label>
                     <Input
-                      placeholder="客戶簽名/確認"
+                      placeholder="客户签名/确认"
                       value={caseData.customerWitness}
                       onChange={(e) => handleCompletedCaseChange(index, 'customerWitness', e.target.value)}
                       disabled={isViewMode}
+                      className="bg-background/50"
                     />
                   </div>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                   <div className="space-y-2">
-                    <Label>安裝門數</Label>
+                    <Label>安装门数</Label>
                     <Input
                       inputMode="numeric"
-                      placeholder="輸入數量"
+                      placeholder="输入数量"
                       value={caseData.doorsInstalled}
                       onChange={(e) => {
                         const val = handleNumericInput(e.target.value);
                         if (val !== '' || e.target.value === '') handleCompletedCaseChange(index, 'doorsInstalled', e.target.value === '' ? '' : val);
                       }}
                       disabled={isViewMode}
-                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-background/50"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>安裝窗數</Label>
+                    <Label>安装窗数</Label>
                     <Input
                       inputMode="numeric"
-                      placeholder="輸入數量"
+                      placeholder="输入数量"
                       value={caseData.windowsInstalled}
                       onChange={(e) => {
                         const val = handleNumericInput(e.target.value);
                         if (val !== '' || e.target.value === '') handleCompletedCaseChange(index, 'windowsInstalled', e.target.value === '' ? '' : val);
                       }}
                       disabled={isViewMode}
-                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-background/50"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>安裝鋁料數</Label>
+                    <Label>安装铝料数</Label>
                     <Input
                       inputMode="numeric"
-                      placeholder="輸入數量"
+                      placeholder="输入数量"
                       value={caseData.aluminumInstalled}
                       onChange={(e) => {
                         const val = handleNumericInput(e.target.value);
                         if (val !== '' || e.target.value === '') handleCompletedCaseChange(index, 'aluminumInstalled', e.target.value === '' ? '' : val);
                       }}
                       disabled={isViewMode}
-                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-background/50"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>拆舊拆拉釘窗花數</Label>
+                    <Label>拆旧拆拉钉窗花数</Label>
                     <Input
                       inputMode="numeric"
-                      placeholder="輸入數量"
+                      placeholder="输入数量"
                       value={caseData.oldGrillesRemoved}
                       onChange={(e) => {
                         const val = handleNumericInput(e.target.value);
                         if (val !== '' || e.target.value === '') handleCompletedCaseChange(index, 'oldGrillesRemoved', e.target.value === '' ? '' : val);
                       }}
                       disabled={isViewMode}
-                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-background/50"
                     />
                   </div>
                 </div>
@@ -564,25 +573,26 @@ const ReportForm = () => {
             <Button
               type="button"
               variant="outline"
-              className="w-full gap-2"
+              className="w-full gap-2 hover-lift border-dashed"
               onClick={addCompletedCase}
             >
               <Plus className="w-4 h-4" />
-              <CheckCircle className="w-4 h-4 text-green-500" />
-              新增已完成個案
+              <CheckCircle className="w-4 h-4 text-success" />
+              新增已完成个案
             </Button>
           )}
 
-          <Separator />
+          <Separator className="my-8" />
 
           {/* Follow-up Cases Section */}
           {formData.followUpCases.map((caseData, index) => (
-            <Card key={`followup-${index}`} className="shadow-card border-border/50">
-              <CardHeader>
+            <Card key={`followup-${index}`} className="shadow-card border-border/50 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-warning/5 to-transparent pointer-events-none" />
+              <CardHeader className="relative">
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
                     <AlertCircle className="w-5 h-5 text-warning" />
-                    需跟進個案 {formData.followUpCases.length > 1 ? `#${index + 1}` : ''}
+                    需跟进个案 {formData.followUpCases.length > 1 ? `#${index + 1}` : ''}
                   </CardTitle>
                   {formData.followUpCases.length > 1 && !isViewMode && (
                     <Button
@@ -590,38 +600,38 @@ const ReportForm = () => {
                       variant="ghost"
                       size="sm"
                       onClick={() => removeFollowUpCase(index)}
-                      className="text-destructive hover:text-destructive"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   )}
                 </div>
-                <CardDescription>填寫需要跟進的個案資料</CardDescription>
+                <CardDescription>填写需要跟进的个案资料</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 relative">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2 sm:col-span-2">
                     <Label>地址</Label>
                     <div className="relative">
                       <MapPin className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                       <Input
-                        placeholder="輸入跟進地址"
+                        placeholder="输入跟进地址"
                         value={caseData.address}
                         onChange={(e) => handleFollowUpCaseChange(index, 'address', e.target.value)}
-                        className="pl-10"
+                        className="pl-10 bg-background/50"
                         disabled={isViewMode}
                       />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label>安裝實際時長</Label>
+                    <Label>安装实际时长</Label>
                     <div className="relative">
                       <Clock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                       <Input
-                        placeholder="例如：3小時"
+                        placeholder="例如：3小时"
                         value={caseData.duration}
                         onChange={(e) => handleFollowUpCaseChange(index, 'duration', e.target.value)}
-                        className="pl-10"
+                        className="pl-10 bg-background/50"
                         disabled={isViewMode}
                       />
                     </div>
@@ -633,11 +643,11 @@ const ReportForm = () => {
                       onValueChange={(value) => handleFollowUpCaseChange(index, 'measuringColleague', value === '_empty' ? '' : value)}
                       disabled={isViewMode}
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder="選擇度尺同事" />
+                      <SelectTrigger className="bg-background/50">
+                        <SelectValue placeholder="选择度尺同事" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="_empty">不選擇</SelectItem>
+                        <SelectItem value="_empty">不选择</SelectItem>
                         {MEASURING_COLLEAGUES.map((name) => (
                           <SelectItem key={name} value={name}>{name}</SelectItem>
                         ))}
@@ -648,75 +658,76 @@ const ReportForm = () => {
 
                 <div className="grid gap-4 sm:grid-cols-4">
                   <div className="space-y-2">
-                    <Label>開料數</Label>
+                    <Label>开料数</Label>
                     <Input
                       inputMode="numeric"
-                      placeholder="輸入數量"
+                      placeholder="输入数量"
                       value={caseData.materialsCut}
                       onChange={(e) => {
                         const val = handleNumericInput(e.target.value);
                         if (val !== '' || e.target.value === '') handleFollowUpCaseChange(index, 'materialsCut', e.target.value === '' ? '' : val);
                       }}
                       disabled={isViewMode}
-                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-background/50"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>補料數</Label>
+                    <Label>补料数</Label>
                     <Input
                       inputMode="numeric"
-                      placeholder="輸入數量"
+                      placeholder="输入数量"
                       value={caseData.materialsSupplemented}
                       onChange={(e) => {
                         const val = handleNumericInput(e.target.value);
                         if (val !== '' || e.target.value === '') handleFollowUpCaseChange(index, 'materialsSupplemented', e.target.value === '' ? '' : val);
                       }}
                       disabled={isViewMode}
-                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-background/50"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>重訂數</Label>
+                    <Label>重订数</Label>
                     <Input
                       inputMode="numeric"
-                      placeholder="輸入數量"
+                      placeholder="输入数量"
                       value={caseData.reorders}
                       onChange={(e) => {
                         const val = handleNumericInput(e.target.value);
                         if (val !== '' || e.target.value === '') handleFollowUpCaseChange(index, 'reorders', e.target.value === '' ? '' : val);
                       }}
                       disabled={isViewMode}
-                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-background/50"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>重訂位置</Label>
+                    <Label>重订位置</Label>
                     <Input
-                      placeholder="重訂的位置"
+                      placeholder="重订的位置"
                       value={caseData.reorderLocation}
                       onChange={(e) => handleFollowUpCaseChange(index, 'reorderLocation', e.target.value)}
                       disabled={isViewMode}
+                      className="bg-background/50"
                     />
                   </div>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label>責任選項</Label>
+                    <Label>责任选项</Label>
                     <Select
                       value={caseData.responsibility}
                       onValueChange={(value) => handleFollowUpCaseChange(index, 'responsibility', value === '_empty' ? '' : value)}
                       disabled={isViewMode}
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder="選擇責任方" />
+                      <SelectTrigger className="bg-background/50">
+                        <SelectValue placeholder="选择责任方" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="_empty">不選擇</SelectItem>
-                        <SelectItem value="安裝">安裝</SelectItem>
+                        <SelectItem value="_empty">不选择</SelectItem>
+                        <SelectItem value="安装">安装</SelectItem>
                         <SelectItem value="度尺">度尺</SelectItem>
-                        <SelectItem value="廠方">廠方</SelectItem>
-                        <SelectItem value="客戶">客戶</SelectItem>
+                        <SelectItem value="厂方">厂方</SelectItem>
+                        <SelectItem value="客户">客户</SelectItem>
                         <SelectItem value="其他">其他</SelectItem>
                       </SelectContent>
                     </Select>
@@ -728,8 +739,8 @@ const ReportForm = () => {
                       onValueChange={(value) => handleFollowUpCaseChange(index, 'urgency', value)}
                       disabled={isViewMode}
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder="選擇" />
+                      <SelectTrigger className="bg-background/50">
+                        <SelectValue placeholder="选择" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="正常">正常</SelectItem>
@@ -740,82 +751,84 @@ const ReportForm = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>跟進詳情</Label>
+                  <Label>跟进详情</Label>
                   <Textarea
-                    placeholder="需要跟進的事項..."
+                    placeholder="需要跟进的事项..."
                     value={caseData.details}
                     onChange={(e) => handleFollowUpCaseChange(index, 'details', e.target.value)}
                     rows={3}
                     disabled={isViewMode}
+                    className="bg-background/50"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label>客戶反饋</Label>
+                  <Label>客户反馈</Label>
                   <Textarea
-                    placeholder="客戶的意見及反饋..."
+                    placeholder="客户的意见及反馈..."
                     value={caseData.customerFeedback}
                     onChange={(e) => handleFollowUpCaseChange(index, 'customerFeedback', e.target.value)}
                     rows={2}
                     disabled={isViewMode}
+                    className="bg-background/50"
                   />
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                   <div className="space-y-2">
-                    <Label>安裝門數</Label>
+                    <Label>安装门数</Label>
                     <Input
                       inputMode="numeric"
-                      placeholder="輸入數量"
+                      placeholder="输入数量"
                       value={caseData.doorsInstalled}
                       onChange={(e) => {
                         const val = handleNumericInput(e.target.value);
                         if (val !== '' || e.target.value === '') handleFollowUpCaseChange(index, 'doorsInstalled', e.target.value === '' ? '' : val);
                       }}
                       disabled={isViewMode}
-                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-background/50"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>安裝窗數</Label>
+                    <Label>安装窗数</Label>
                     <Input
                       inputMode="numeric"
-                      placeholder="輸入數量"
+                      placeholder="输入数量"
                       value={caseData.windowsInstalled}
                       onChange={(e) => {
                         const val = handleNumericInput(e.target.value);
                         if (val !== '' || e.target.value === '') handleFollowUpCaseChange(index, 'windowsInstalled', e.target.value === '' ? '' : val);
                       }}
                       disabled={isViewMode}
-                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-background/50"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>安裝鋁料數</Label>
+                    <Label>安装铝料数</Label>
                     <Input
                       inputMode="numeric"
-                      placeholder="輸入數量"
+                      placeholder="输入数量"
                       value={caseData.aluminumInstalled}
                       onChange={(e) => {
                         const val = handleNumericInput(e.target.value);
                         if (val !== '' || e.target.value === '') handleFollowUpCaseChange(index, 'aluminumInstalled', e.target.value === '' ? '' : val);
                       }}
                       disabled={isViewMode}
-                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-background/50"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>拆舊拆拉釘窗花數</Label>
+                    <Label>拆旧拆拉钉窗花数</Label>
                     <Input
                       inputMode="numeric"
-                      placeholder="輸入數量"
+                      placeholder="输入数量"
                       value={caseData.oldGrillesRemoved}
                       onChange={(e) => {
                         const val = handleNumericInput(e.target.value);
                         if (val !== '' || e.target.value === '') handleFollowUpCaseChange(index, 'oldGrillesRemoved', e.target.value === '' ? '' : val);
                       }}
                       disabled={isViewMode}
-                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-background/50"
                     />
                   </div>
                 </div>
@@ -828,12 +841,12 @@ const ReportForm = () => {
             <Button
               type="button"
               variant="outline"
-              className="w-full gap-2"
+              className="w-full gap-2 hover-lift border-dashed"
               onClick={addFollowUpCase}
             >
               <Plus className="w-4 h-4" />
               <AlertCircle className="w-4 h-4 text-warning" />
-              新增需跟進個案
+              新增需跟进个案
             </Button>
           )}
 
@@ -844,20 +857,24 @@ const ReportForm = () => {
                 type="button" 
                 variant="outline" 
                 onClick={() => navigate('/my-reports')}
+                className="hover-lift"
               >
                 取消
               </Button>
               <Button 
                 type="submit" 
-                className="gradient-primary text-primary-foreground gap-2"
                 disabled={isSaving}
+                className="gradient-primary text-primary-foreground min-w-[120px] shadow-soft hover-lift"
               >
                 {isSaving ? (
-                  '儲存中...'
+                  <>
+                    <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin mr-2" />
+                    {isEditMode ? '更新中...' : '提交中...'}
+                  </>
                 ) : (
                   <>
-                    <Save className="w-4 h-4" />
-                    提交報告
+                    <Save className="w-4 h-4 mr-2" />
+                    {isEditMode ? '更新报告' : '提交报告'}
                   </>
                 )}
               </Button>
