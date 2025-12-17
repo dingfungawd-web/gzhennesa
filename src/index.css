@@ -9,10 +9,10 @@
     --background: 220 20% 97%;
     --foreground: 220 30% 10%;
 
-    --card: 0 0% 100%;
+    --card: 220 20% 100%;
     --card-foreground: 220 30% 10%;
 
-    --popover: 0 0% 100%;
+    --popover: 220 20% 100%;
     --popover-foreground: 220 30% 10%;
 
     --primary: 220 90% 56%;
@@ -166,7 +166,7 @@
   .glass-effect {
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    background: hsl(var(--card) / 0.8);
+    background: hsl(220 20% 99% / 0.9);
     border: 1px solid hsl(var(--border) / 0.5);
   }
 
