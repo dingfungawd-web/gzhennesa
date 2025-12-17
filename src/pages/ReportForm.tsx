@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { format } from 'date-fns';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { ReportFormData, CompletedCase, FollowUpCase, emptyCompletedCase, emptyFollowUpCase, Report } from '@/types/report';
@@ -28,9 +29,37 @@ import { toast } from 'sonner';
 const INSTALLERS = ['陳浩嘉', '朱沛儒', '王勇', '陳辉鸿', '小卓'];
 const MEASURING_COLLEAGUES = ['黃仲柱', '彭晨陽', '李偉國'];
 
+const toISODateForInput = (raw: string): string => {
+  const value = String(raw || '').trim();
+  if (!value) return '';
+
+  // Already yyyy-mm-dd
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+
+  // yyyy/m/d or yyyy-mm-dd (non-padded)
+  const ymd = value.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/);
+  if (ymd) {
+    const [, y, m, d] = ymd;
+    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+  }
+
+  // d/m/yyyy
+  const dmy = value.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
+  if (dmy) {
+    const [, d, m, y] = dmy;
+    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+  }
+
+  // Fallback: try Date parse
+  const dt = new Date(value);
+  if (!Number.isNaN(dt.getTime())) return format(dt, 'yyyy-MM-dd');
+
+  return '';
+};
+
 const initialFormData: ReportFormData = {
   basicInfo: {
-    date: new Date().toISOString().split('T')[0],
+    date: format(new Date(), 'yyyy-MM-dd'),
     team: '',
     installer1: '',
     installer2: '',
@@ -88,7 +117,7 @@ const reportsToFormData = (reports: Report[]): ReportFormData => {
 
   return {
     basicInfo: {
-      date: first.date || '',
+      date: toISODateForInput(first.date || ''),
       team: first.team || '',
       installer1: first.installer1 || '',
       installer2: first.installer2 || '',
@@ -246,13 +275,15 @@ const ReportForm = () => {
       }
       navigate('/my-reports');
     } catch (error) {
+      console.error('Report submit/update failed:', error);
       const msg = error instanceof Error ? error.message : '';
       if (msg.includes('Session expired')) {
         toast.error('登入狀態已失效，請重新登入');
         navigate('/');
         return;
       }
-      toast.error(isEditMode ? '更新失敗，請重試' : '儲存失敗，請重試');
+      const fallback = isEditMode ? '更新失敗，請重試' : '儲存失敗，請重試';
+      toast.error(msg ? `${fallback}（${msg}）` : fallback);
     } finally {
       setIsSaving(false);
     }
