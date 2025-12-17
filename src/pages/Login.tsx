@@ -197,7 +197,7 @@ const Login = () => {
           <p className="text-muted-foreground mt-2">提交及管理您的安装报告</p>
         </div>
 
-        <Card className="shadow-card border-border/50 glass-effect">
+        <Card className="shadow-card border-border/50 bg-card">
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2 bg-muted/50">
               <TabsTrigger value="login" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">登录</TabsTrigger>
@@ -224,7 +224,7 @@ const Login = () => {
                         placeholder="请输入用户名"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        className="pl-10 bg-background/50"
+                        className="pl-10"
                         autoComplete="username"
                         autoFocus
                         maxLength={50}
@@ -241,7 +241,7 @@ const Login = () => {
                         placeholder="请输入密码"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="pl-10 bg-background/50"
+                        className="pl-10"
                         autoComplete="current-password"
                         maxLength={72}
                       />
@@ -283,7 +283,7 @@ const Login = () => {
                         placeholder="请输入用户名"
                         value={registerUsername}
                         onChange={(e) => setRegisterUsername(e.target.value)}
-                        className="pl-10 bg-background/50"
+                        className="pl-10"
                         autoComplete="off"
                         maxLength={50}
                       />
@@ -302,7 +302,7 @@ const Login = () => {
                         placeholder="请输入密码"
                         value={registerPassword}
                         onChange={(e) => setRegisterPassword(e.target.value)}
-                        className="pl-10 bg-background/50"
+                        className="pl-10"
                         autoComplete="new-password"
                         maxLength={72}
                       />
@@ -321,7 +321,7 @@ const Login = () => {
                         placeholder="请再次输入密码"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="pl-10 bg-background/50"
+                        className="pl-10"
                         autoComplete="new-password"
                         maxLength={72}
                       />

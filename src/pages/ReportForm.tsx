@@ -347,7 +347,7 @@ const ReportForm = () => {
                   onChange={(e) => handleBasicInfoChange('date', e.target.value)}
                   disabled={isViewMode}
                   required
-                  className="bg-background/50"
+                  className=""
                 />
               </div>
               <div className="space-y-2">
@@ -359,7 +359,7 @@ const ReportForm = () => {
                   onChange={(e) => handleBasicInfoChange('team', e.target.value)}
                   disabled={isViewMode}
                   required
-                  className="bg-background/50"
+                  className=""
                 />
               </div>
             </CardContent>
@@ -386,7 +386,7 @@ const ReportForm = () => {
                       onValueChange={(value) => handleBasicInfoChange(`installer${num}` as keyof typeof formData.basicInfo, value === '_empty' ? '' : value)}
                       disabled={isViewMode}
                     >
-                      <SelectTrigger className="bg-background/50">
+                      <SelectTrigger>
                         <SelectValue placeholder="选择同事" />
                       </SelectTrigger>
                       <SelectContent>
@@ -441,7 +441,7 @@ const ReportForm = () => {
                         placeholder="输入安装地址"
                         value={caseData.address}
                         onChange={(e) => handleCompletedCaseChange(index, 'address', e.target.value)}
-                        className="pl-10 bg-background/50"
+                        className="pl-10"
                         disabled={isViewMode}
                       />
                     </div>
@@ -454,7 +454,7 @@ const ReportForm = () => {
                         placeholder="例如：3小时"
                         value={caseData.actualDuration}
                         onChange={(e) => handleCompletedCaseChange(index, 'actualDuration', e.target.value)}
-                        className="pl-10 bg-background/50"
+                        className="pl-10"
                         disabled={isViewMode}
                       />
                     </div>
@@ -467,7 +467,7 @@ const ReportForm = () => {
                         placeholder="例如：2小时"
                         value={caseData.estimatedDuration}
                         onChange={(e) => handleCompletedCaseChange(index, 'estimatedDuration', e.target.value)}
-                        className="pl-10 bg-background/50"
+                        className="pl-10"
                         disabled={isViewMode}
                       />
                     </div>
@@ -479,7 +479,7 @@ const ReportForm = () => {
                       onValueChange={(value) => handleCompletedCaseChange(index, 'measuringColleague', value === '_empty' ? '' : value)}
                       disabled={isViewMode}
                     >
-                      <SelectTrigger className="bg-background/50">
+                      <SelectTrigger>
                         <SelectValue placeholder="选择度尺同事" />
                       </SelectTrigger>
                       <SelectContent>
@@ -500,7 +500,7 @@ const ReportForm = () => {
                     onChange={(e) => handleCompletedCaseChange(index, 'difficulties', e.target.value)}
                     rows={3}
                     disabled={isViewMode}
-                    className="bg-background/50"
+                    className=""
                   />
                 </div>
 
@@ -513,7 +513,7 @@ const ReportForm = () => {
                       onChange={(e) => handleCompletedCaseChange(index, 'customerFeedback', e.target.value)}
                       rows={2}
                       disabled={isViewMode}
-                      className="bg-background/50"
+                      className=""
                     />
                   </div>
                   <div className="space-y-2">
@@ -523,7 +523,7 @@ const ReportForm = () => {
                       onValueChange={(value) => handleCompletedCaseChange(index, 'customerWitness', value === '_empty' ? '' : value)}
                       disabled={isViewMode}
                     >
-                      <SelectTrigger className="bg-background/50">
+                      <SelectTrigger>
                         <SelectValue placeholder="选择" />
                       </SelectTrigger>
                       <SelectContent>
@@ -547,7 +547,7 @@ const ReportForm = () => {
                         if (val !== '' || e.target.value === '') handleCompletedCaseChange(index, 'balconySealed', e.target.value === '' ? '' : val);
                       }}
                       disabled={isViewMode}
-                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-background/50"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>
                   <div className="space-y-2">
@@ -561,7 +561,7 @@ const ReportForm = () => {
                         if (val !== '' || e.target.value === '') handleCompletedCaseChange(index, 'doorsInstalled', e.target.value === '' ? '' : val);
                       }}
                       disabled={isViewMode}
-                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-background/50"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>
                   <div className="space-y-2">
@@ -575,7 +575,7 @@ const ReportForm = () => {
                         if (val !== '' || e.target.value === '') handleCompletedCaseChange(index, 'windowsInstalled', e.target.value === '' ? '' : val);
                       }}
                       disabled={isViewMode}
-                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-background/50"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>
                   <div className="space-y-2">
@@ -589,7 +589,7 @@ const ReportForm = () => {
                         if (val !== '' || e.target.value === '') handleCompletedCaseChange(index, 'aluminumInstalled', e.target.value === '' ? '' : val);
                       }}
                       disabled={isViewMode}
-                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-background/50"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>
                   <div className="space-y-2">
@@ -603,7 +603,7 @@ const ReportForm = () => {
                         if (val !== '' || e.target.value === '') handleCompletedCaseChange(index, 'oldRemoved', e.target.value === '' ? '' : val);
                       }}
                       disabled={isViewMode}
-                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-background/50"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>
                 </div>
@@ -661,7 +661,7 @@ const ReportForm = () => {
                         placeholder="输入跟进地址"
                         value={caseData.address}
                         onChange={(e) => handleFollowUpCaseChange(index, 'address', e.target.value)}
-                        className="pl-10 bg-background/50"
+                        className="pl-10"
                         disabled={isViewMode}
                       />
                     </div>
@@ -674,7 +674,7 @@ const ReportForm = () => {
                         placeholder="例如：3小时"
                         value={caseData.duration}
                         onChange={(e) => handleFollowUpCaseChange(index, 'duration', e.target.value)}
-                        className="pl-10 bg-background/50"
+                        className="pl-10"
                         disabled={isViewMode}
                       />
                     </div>
@@ -687,7 +687,7 @@ const ReportForm = () => {
                         placeholder="例如：2小时"
                         value={caseData.estimatedDuration}
                         onChange={(e) => handleFollowUpCaseChange(index, 'estimatedDuration', e.target.value)}
-                        className="pl-10 bg-background/50"
+                        className="pl-10"
                         disabled={isViewMode}
                       />
                     </div>
@@ -699,7 +699,7 @@ const ReportForm = () => {
                       onValueChange={(value) => handleFollowUpCaseChange(index, 'measuringColleague', value === '_empty' ? '' : value)}
                       disabled={isViewMode}
                     >
-                      <SelectTrigger className="bg-background/50">
+                      <SelectTrigger>
                         <SelectValue placeholder="选择度尺同事" />
                       </SelectTrigger>
                       <SelectContent>
@@ -724,7 +724,7 @@ const ReportForm = () => {
                         if (val !== '' || e.target.value === '') handleFollowUpCaseChange(index, 'reorders', e.target.value === '' ? '' : val);
                       }}
                       disabled={isViewMode}
-                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-background/50"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>
                   <div className="space-y-2">
@@ -734,7 +734,7 @@ const ReportForm = () => {
                       value={caseData.reorderLocation}
                       onChange={(e) => handleFollowUpCaseChange(index, 'reorderLocation', e.target.value)}
                       disabled={isViewMode}
-                      className="bg-background/50"
+                      className=""
                     />
                   </div>
                 </div>
@@ -747,7 +747,7 @@ const ReportForm = () => {
                       onValueChange={(value) => handleFollowUpCaseChange(index, 'responsibility', value === '_empty' ? '' : value)}
                       disabled={isViewMode}
                     >
-                      <SelectTrigger className="bg-background/50">
+                      <SelectTrigger>
                         <SelectValue placeholder="选择责任方" />
                       </SelectTrigger>
                       <SelectContent>
@@ -767,7 +767,7 @@ const ReportForm = () => {
                       onValueChange={(value) => handleFollowUpCaseChange(index, 'urgency', value === '_empty' ? '' : value)}
                       disabled={isViewMode}
                     >
-                      <SelectTrigger className="bg-background/50">
+                      <SelectTrigger>
                         <SelectValue placeholder="选择" />
                       </SelectTrigger>
                       <SelectContent>
@@ -787,7 +787,7 @@ const ReportForm = () => {
                     onChange={(e) => handleFollowUpCaseChange(index, 'details', e.target.value)}
                     rows={3}
                     disabled={isViewMode}
-                    className="bg-background/50"
+                    className=""
                   />
                 </div>
 
@@ -799,7 +799,7 @@ const ReportForm = () => {
                     onChange={(e) => handleFollowUpCaseChange(index, 'customerFeedback', e.target.value)}
                     rows={2}
                     disabled={isViewMode}
-                    className="bg-background/50"
+                    className=""
                   />
                 </div>
 
@@ -815,7 +815,7 @@ const ReportForm = () => {
                         if (val !== '' || e.target.value === '') handleFollowUpCaseChange(index, 'balconySealed', e.target.value === '' ? '' : val);
                       }}
                       disabled={isViewMode}
-                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-background/50"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>
                   <div className="space-y-2">
@@ -829,7 +829,7 @@ const ReportForm = () => {
                         if (val !== '' || e.target.value === '') handleFollowUpCaseChange(index, 'doorsInstalled', e.target.value === '' ? '' : val);
                       }}
                       disabled={isViewMode}
-                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-background/50"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>
                   <div className="space-y-2">
@@ -843,7 +843,7 @@ const ReportForm = () => {
                         if (val !== '' || e.target.value === '') handleFollowUpCaseChange(index, 'windowsInstalled', e.target.value === '' ? '' : val);
                       }}
                       disabled={isViewMode}
-                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-background/50"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>
                   <div className="space-y-2">
@@ -857,7 +857,7 @@ const ReportForm = () => {
                         if (val !== '' || e.target.value === '') handleFollowUpCaseChange(index, 'aluminumInstalled', e.target.value === '' ? '' : val);
                       }}
                       disabled={isViewMode}
-                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-background/50"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>
                   <div className="space-y-2">
@@ -871,7 +871,7 @@ const ReportForm = () => {
                         if (val !== '' || e.target.value === '') handleFollowUpCaseChange(index, 'oldRemoved', e.target.value === '' ? '' : val);
                       }}
                       disabled={isViewMode}
-                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-background/50"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>
                 </div>

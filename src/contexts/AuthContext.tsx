@@ -100,9 +100,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem(SESSION_TOKEN_KEY);
   };
 
-  // Don't render children until initial validation is complete
+  // Show loading state during initial validation to prevent flickering
   if (isValidating) {
-    return null;
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
   }
 
   return (
