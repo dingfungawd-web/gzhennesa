@@ -193,8 +193,8 @@ const Dashboard = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <Card className="shadow-card hover-lift border-border/50 overflow-hidden">
-            <div className="absolute inset-0 gradient-glow opacity-50" />
+          <Card className="shadow-card hover-lift border-border/50 overflow-hidden relative">
+            <div className="absolute inset-0 gradient-glow opacity-50 pointer-events-none" />
             <CardContent className="pt-6 relative">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center tech-border">
@@ -207,8 +207,8 @@ const Dashboard = () => {
               </div>
             </CardContent>
           </Card>
-          <Card className="shadow-card hover-lift border-border/50 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-success/5 to-success/10 opacity-50" />
+          <Card className="shadow-card hover-lift border-border/50 overflow-hidden relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-success/5 to-success/10 opacity-50 pointer-events-none" />
             <CardContent className="pt-6 relative">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
@@ -221,8 +221,8 @@ const Dashboard = () => {
               </div>
             </CardContent>
           </Card>
-          <Card className="shadow-card hover-lift border-border/50 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-warning/5 to-warning/10 opacity-50" />
+          <Card className="shadow-card hover-lift border-border/50 overflow-hidden relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-warning/5 to-warning/10 opacity-50 pointer-events-none" />
             <CardContent className="pt-6 relative">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center">
