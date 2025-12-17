@@ -109,6 +109,14 @@
     @apply border-border;
   }
 
+  html {
+    background-color: hsl(220 20% 97%);
+  }
+
+  html.dark {
+    background-color: hsl(222 30% 8%);
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', sans-serif;
