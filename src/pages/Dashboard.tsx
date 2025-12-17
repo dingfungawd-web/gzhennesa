@@ -25,6 +25,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { toast } from 'sonner';
+import logoImage from '@/assets/logo.jpg';
 
 interface GroupedReport {
   reportCode: string;
@@ -155,11 +156,11 @@ const Dashboard = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-glow">
-                <ClipboardList className="w-5 h-5 text-primary-foreground" />
+              <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-soft overflow-hidden">
+                <img src={logoImage} alt="HENNESA Logo" className="w-full h-full object-contain" />
               </div>
               <div>
-                <h1 className="font-semibold text-foreground">安装报告系统</h1>
+                <h1 className="font-semibold text-foreground">HENNESA 安装报告系统</h1>
                 <p className="text-sm text-muted-foreground">欢迎，{username}</p>
               </div>
             </div>

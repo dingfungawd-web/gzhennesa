@@ -5,9 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ClipboardList, User, UserPlus, Lock } from 'lucide-react';
+import { User, UserPlus, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import logoImage from '@/assets/logo.jpg';
 
 // Input validation
 const validateUsername = (username: string): string | null => {
@@ -189,10 +190,10 @@ const Login = () => {
 
       <div className="w-full max-w-md animate-slide-up relative z-10">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl gradient-primary shadow-glow mb-4 animate-glow-pulse">
-            <ClipboardList className="w-8 h-8 text-primary-foreground" />
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white shadow-glow mb-4 overflow-hidden">
+            <img src={logoImage} alt="HENNESA Logo" className="w-full h-full object-contain" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">安装报告系统</h1>
+          <h1 className="text-2xl font-bold text-foreground">HENNESA 安装报告系统</h1>
           <p className="text-muted-foreground mt-2">提交及管理您的安装报告</p>
         </div>
 
