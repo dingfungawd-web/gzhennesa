@@ -104,7 +104,7 @@ const reportsToFormData = (reports: Report[]): ReportFormData => {
         measuringColleague: r.followUpMeasuringColleague || '',
         reorderLocation: r.reorderLocation || '',
         responsibility: r.responsibility || '',
-        urgency: r.urgency || '正常',
+        urgency: r.urgency || '',
         details: r.followUpDetails || '',
         customerFeedback: r.followUpCustomerFeedback || '',
         doorsInstalled: String(r.followUpDoorsInstalled || ''),
@@ -373,26 +373,33 @@ const ReportForm = () => {
               <CardDescription>选择参与安装的同事</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
-              {[1, 2, 3, 4].map((num) => (
-                <div key={num} className="space-y-2">
-                  <Label>安装同事 {num}</Label>
-                  <Select
-                    value={formData.basicInfo[`installer${num}` as keyof typeof formData.basicInfo]}
-                    onValueChange={(value) => handleBasicInfoChange(`installer${num}` as keyof typeof formData.basicInfo, value === '_empty' ? '' : value)}
-                    disabled={isViewMode}
-                  >
-                    <SelectTrigger className="bg-background/50">
-                      <SelectValue placeholder="选择同事" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="_empty">不选择</SelectItem>
-                      {INSTALLERS.map((name) => (
-                        <SelectItem key={name} value={name}>{name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              ))}
+              {[1, 2, 3, 4].map((num) => {
+                const installerValue = formData.basicInfo[`installer${num}` as keyof typeof formData.basicInfo];
+                const isCustomValue = installerValue && !INSTALLERS.includes(installerValue);
+                return (
+                  <div key={num} className="space-y-2">
+                    <Label>安装同事 {num}</Label>
+                    <Select
+                      value={installerValue || '_empty'}
+                      onValueChange={(value) => handleBasicInfoChange(`installer${num}` as keyof typeof formData.basicInfo, value === '_empty' ? '' : value)}
+                      disabled={isViewMode}
+                    >
+                      <SelectTrigger className="bg-background/50">
+                        <SelectValue placeholder="选择同事" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="_empty">不选择</SelectItem>
+                        {isCustomValue && (
+                          <SelectItem value={installerValue}>{installerValue}</SelectItem>
+                        )}
+                        {INSTALLERS.map((name) => (
+                          <SelectItem key={name} value={name}>{name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                );
+              })}
             </CardContent>
           </Card>
 
@@ -496,13 +503,20 @@ const ReportForm = () => {
                   </div>
                   <div className="space-y-2">
                     <Label>客户亲证</Label>
-                    <Input
-                      placeholder="客户签名/确认"
-                      value={caseData.customerWitness}
-                      onChange={(e) => handleCompletedCaseChange(index, 'customerWitness', e.target.value)}
+                    <Select
+                      value={caseData.customerWitness || '_empty'}
+                      onValueChange={(value) => handleCompletedCaseChange(index, 'customerWitness', value === '_empty' ? '' : value)}
                       disabled={isViewMode}
-                      className="bg-background/50"
-                    />
+                    >
+                      <SelectTrigger className="bg-background/50">
+                        <SelectValue placeholder="选择" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="_empty">不选择</SelectItem>
+                        <SelectItem value="有">有</SelectItem>
+                        <SelectItem value="无">无</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
@@ -735,14 +749,15 @@ const ReportForm = () => {
                   <div className="space-y-2">
                     <Label>正常/加急</Label>
                     <Select
-                      value={caseData.urgency}
-                      onValueChange={(value) => handleFollowUpCaseChange(index, 'urgency', value)}
+                      value={caseData.urgency || '_empty'}
+                      onValueChange={(value) => handleFollowUpCaseChange(index, 'urgency', value === '_empty' ? '' : value)}
                       disabled={isViewMode}
                     >
                       <SelectTrigger className="bg-background/50">
                         <SelectValue placeholder="选择" />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="_empty">不选择</SelectItem>
                         <SelectItem value="正常">正常</SelectItem>
                         <SelectItem value="加急">加急</SelectItem>
                       </SelectContent>
