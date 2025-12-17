@@ -6,6 +6,7 @@
 
 @layer base {
   :root {
+    color-scheme: light;
     --background: 220 20% 97%;
     --foreground: 220 30% 10%;
 
@@ -56,6 +57,7 @@
   }
 
   .dark {
+    color-scheme: dark;
     --background: 222 30% 8%;
     --foreground: 220 15% 95%;
 
@@ -110,11 +112,11 @@
   }
 
   html {
-    background-color: hsl(220 20% 97%);
+    background-color: hsl(var(--background));
   }
 
   html.dark {
-    background-color: hsl(222 30% 8%);
+    background-color: hsl(var(--background));
   }
 
   body {
@@ -181,8 +183,6 @@
   }
 
   .glass-effect {
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
     background: hsl(var(--card));
     border: 1px solid hsl(var(--border) / 0.5);
   }
