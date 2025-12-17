@@ -28,6 +28,16 @@ const sanitizeString = (input: string): string => {
     .replace(/[<>]/g, (char) => char === '<' ? '&lt;' : '&gt;');
 };
 
+const readAppsScriptResponse = async (response: Response) => {
+  const text = await response.text().catch(() => '');
+  if (!text) return { json: null as any, text: '' };
+  try {
+    return { json: JSON.parse(text), text };
+  } catch {
+    return { json: null as any, text };
+  }
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -79,29 +89,42 @@ serve(async (req) => {
 
   try {
     if (req.method === 'GET') {
-      // Get reports for the authenticated user only
       const fetchUrl = `${appsScriptUrl}?username=${encodeURIComponent(authenticatedUsername)}`;
-      
       console.log('Fetching reports for user:', authenticatedUsername);
-      
-      const response = await fetch(fetchUrl, {
+
+      const upstream = await fetch(fetchUrl, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
-      
-      const data = await response.json();
+
+      const { json, text } = await readAppsScriptResponse(upstream);
+
+      if (!json) {
+        console.error('Apps Script returned non-JSON (GET)', upstream.status, text.slice(0, 200));
+        return new Response(JSON.stringify({
+          error: 'Apps Script returned non-JSON response',
+          status: upstream.status,
+          body: text.slice(0, 500),
+        }), {
+          status: 502,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      if (!upstream.ok) {
+        console.error('Apps Script error (GET)', upstream.status, json);
+      }
+
       console.log('Apps Script response received');
-      
-      return new Response(JSON.stringify(data), {
+      return new Response(JSON.stringify(json), {
+        status: upstream.ok ? 200 : upstream.status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-    
+
     if (req.method === 'POST') {
-      // Add a report
       const body = await req.json();
-      
-      // Validate request body structure
+
       if (!body || !body.rows || !Array.isArray(body.rows)) {
         return new Response(JSON.stringify({ error: 'Invalid request body' }), {
           status: 400,
@@ -109,42 +132,55 @@ serve(async (req) => {
         });
       }
 
-      // Enforce that the username in each row matches the authenticated user
       const sanitizedRows = body.rows.map((row: string[]) => {
         if (!Array.isArray(row)) {
           throw new Error('Invalid row format');
         }
-        // First element (index 0) should be username - enforce authenticated username
         const sanitizedRow = row.map((cell, index) => {
           if (index === 0) {
-            // Always use the authenticated username
             return authenticatedUsername;
           }
           return typeof cell === 'string' ? sanitizeString(cell) : String(cell || '');
         });
         return sanitizedRow;
       });
-      
+
       console.log('Posting report for user:', authenticatedUsername);
-      
-      const response = await fetch(appsScriptUrl, {
+
+      const upstream = await fetch(appsScriptUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ rows: sanitizedRows }),
       });
-      
-      const data = await response.json();
+
+      const { json, text } = await readAppsScriptResponse(upstream);
+
+      if (!json) {
+        console.error('Apps Script returned non-JSON (POST)', upstream.status, text.slice(0, 200));
+        return new Response(JSON.stringify({
+          error: 'Apps Script returned non-JSON response',
+          status: upstream.status,
+          body: text.slice(0, 500),
+        }), {
+          status: 502,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      if (!upstream.ok) {
+        console.error('Apps Script error (POST)', upstream.status, json);
+      }
+
       console.log('Apps Script POST response received');
-      
-      return new Response(JSON.stringify(data), {
+      return new Response(JSON.stringify(json), {
+        status: upstream.ok ? 200 : upstream.status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     if (req.method === 'PUT') {
-      // Update existing report
       const body = await req.json();
-      
+
       if (!body || !body.reportCode || !body.rows || !Array.isArray(body.rows)) {
         return new Response(JSON.stringify({ error: 'Invalid request body' }), {
           status: 400,
@@ -164,24 +200,41 @@ serve(async (req) => {
         });
         return sanitizedRow;
       });
-      
+
       console.log('Updating report for user:', authenticatedUsername, 'reportCode:', body.reportCode);
-      
-      const response = await fetch(appsScriptUrl, {
+
+      const upstream = await fetch(appsScriptUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           action: 'update',
           reportCode: body.reportCode,
           username: authenticatedUsername,
-          rows: sanitizedRows 
+          rows: sanitizedRows,
         }),
       });
-      
-      const data = await response.json();
+
+      const { json, text } = await readAppsScriptResponse(upstream);
+
+      if (!json) {
+        console.error('Apps Script returned non-JSON (PUT/update)', upstream.status, text.slice(0, 200));
+        return new Response(JSON.stringify({
+          error: 'Apps Script returned non-JSON response',
+          status: upstream.status,
+          body: text.slice(0, 500),
+        }), {
+          status: 502,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      if (!upstream.ok) {
+        console.error('Apps Script error (PUT/update)', upstream.status, json);
+      }
+
       console.log('Apps Script UPDATE response received');
-      
-      return new Response(JSON.stringify(data), {
+      return new Response(JSON.stringify(json), {
+        status: upstream.ok ? 200 : upstream.status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }

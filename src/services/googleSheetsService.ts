@@ -15,6 +15,16 @@ const getAuthHeaders = () => {
   };
 };
 
+const readJsonFromResponse = async (response: Response) => {
+  const text = await response.text().catch(() => '');
+  if (!text) return { data: null as any, text: '' };
+  try {
+    return { data: JSON.parse(text), text };
+  } catch {
+    return { data: null as any, text };
+  }
+};
+
 export async function fetchUserReports(username: string): Promise<Report[]> {
   try {
     const response = await fetch(`${FUNCTION_URL}?username=${encodeURIComponent(username)}`, {
@@ -186,14 +196,18 @@ export async function submitReport(username: string, formData: ReportFormData): 
       throw new Error('Session expired');
     }
 
+    const { data: result, text } = await readJsonFromResponse(response);
+
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('Submit error response:', errorData);
-      throw new Error('Failed to submit report');
+      console.error('Submit error response:', { status: response.status, result, text: text?.slice?.(0, 300) });
+      throw new Error(result?.error || `Failed to submit report (${response.status})`);
     }
 
-    const result = await response.json();
-    return result.success === true;
+    if (result?.success !== true) {
+      throw new Error(result?.error || 'Failed to submit report');
+    }
+
+    return true;
   } catch (error) {
     console.error('Error submitting report:', error);
     throw error;
@@ -298,12 +312,18 @@ export async function updateReport(username: string, formData: ReportFormData): 
       throw new Error('Session expired');
     }
 
+    const { data: result, text } = await readJsonFromResponse(response);
+
     if (!response.ok) {
-      throw new Error('Failed to update report');
+      console.error('Update error response:', { status: response.status, result, text: text?.slice?.(0, 300) });
+      throw new Error(result?.error || `Failed to update report (${response.status})`);
     }
 
-    const result = await response.json();
-    return result.success === true;
+    if (result?.success !== true) {
+      throw new Error(result?.error || 'Failed to update report');
+    }
+
+    return true;
   } catch (error) {
     console.error('Error updating report:', error);
     throw error;
