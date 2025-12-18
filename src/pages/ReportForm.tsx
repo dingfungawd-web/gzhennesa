@@ -304,6 +304,16 @@ const ReportForm = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Full-screen loading overlay to prevent duplicate submissions */}
+      {isSaving && (
+        <div className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm flex items-center justify-center">
+          <div className="text-center p-8 rounded-xl bg-card border border-border shadow-lg">
+            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-lg font-medium text-foreground">提交中...</p>
+            <p className="text-sm text-muted-foreground mt-2">请稍候，正在保存报告</p>
+          </div>
+        </div>
+      )}
       <header className="sticky top-0 z-50 bg-background border-b border-border/50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
