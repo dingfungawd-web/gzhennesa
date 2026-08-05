@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-const INSTALLERS = ['陈浩嘉', '朱沛儒', '王勇', '陈辉鸿', '小卓'];
+const INSTALLERS = ['陈浩嘉', '朱沛儒', '王勇', '陈辉鸿', '小卓', '潘康权', '刘旺', '黄伟龙', '侯庆杰'];
 const MEASURING_COLLEAGUES = ['黄仲柱', '彭晨阳', '李伟国', '王目龙'];
 
 const toISODateForInput = (raw: string): string => {
