@@ -27,7 +27,7 @@ import {
 import { toast } from 'sonner';
 
 const INSTALLERS = ['陈浩嘉', '朱沛儒', '王勇', '陈辉鸿', '潘康权', '刘旺', '黄伟龙', '侯庆杰'];
-const MEASURING_COLLEAGUES = ['黄仲柱', '彭晨阳', '李伟国', '王目龙'];
+const MEASURING_COLLEAGUES = ['黄仲柱', '彭晨阳'];
 
 const toISODateForInput = (raw: string): string => {
   const value = String(raw || '').trim();
