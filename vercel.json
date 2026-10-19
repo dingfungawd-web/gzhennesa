@@ -8,7 +8,7 @@
       "destination": "https://ovjtdnrpfdsmvsjepuwz.supabase.co/:path*"
     },
     {
-      "source": "/((?!assets/).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
